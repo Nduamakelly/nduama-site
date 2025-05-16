@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NDUAMA - Meubles élégants</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fdf8f4;
+      margin: 0;
+      padding: 0;
+      color: #330000;
+    }
+    header {
+      background-color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #a0181b;
+    }
+    header img {
+      max-height: 80px;
+    }
+    .hero {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .hero h1 {
+      color: #7c1212;
+      font-size: 48px;
+      margin: 0;
+    }
+    .hero p {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .about {
+      padding: 20px;
+      text-align: center;
+      background-color: #fff8f4;
+    }
+    .about h2 {
+      font-size: 24px;
+      color: #7c1212;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      padding: 40px 20px;
+    }
+    .product {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .product img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .product h3 {
+      margin: 15px 0 5px;
+      font-size: 20px;
+    }
+    .product p {
+      font-size: 16px;
+      color: #7c1212;
+      margin-bottom: 10px;
+    }
+    .product .price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #7c1212;
+    }
+    .whatsapp-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 15px;
+      background-color: #25D366;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #ddd;
+      font-size: 14px;
+    }
+    .social-icons a {
+      margin: 0 10px;
+      font-size: 20px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo_nduama.png" alt="Logo Nduama" />
+  </header>
+
+  <section class="hero">
+    <h1>NDUAMA</h1>
+    <p>Découvrez notre sélection de meubles élégants et fonctionnels</p>
+  </section>
+
+  <section class="about">
+    <h2>À propos de Nduama</h2>
+    <p>Nduama est une marque congolaise spécialisée dans la fabrication de meubles modernes, solides et élégants. Nous valorisons la production locale, la qualité et le style.</p>
+  </section>
+
+  <section class="products" id="products">
+    <!-- Produits dynamiques affichés depuis Google Sheets -->
+  </section>
+
+  <footer>
+    <p>© 2025 Nduama. Tous droits réservés.</p>
+    <p>Contact WhatsApp : <a href="https://wa.me/243824091223">+243 824 091 223</a></p>
+    <div class="social-icons">
+      <a href="https://www.tiktok.com/@nduamabusinessval" target="_blank">TikTok</a> |
+      <a href="https://www.instagram.com/nduama.business_val" target="_blank">Instagram</a> |
+      <a href="https://www.facebook.com/share/197ztF7d9x/" target="_blank">Facebook</a>
+    </div>
+  </footer>
+
+  <script>
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSscA0CjLd3zdd9eK3gujqtKU_CgDozMGiKXFaRrBF1UrSlI5M_uHLnypJIRXMVoTzLGmuG-KiWhGNK/pub?gid=0&single=true&output=csv";
+
+    fetch(url)
+      .then(response => response.text())
+      .then(csv => {
+        const lines = csv.split("\n").slice(1); // skip headers
+        const container = document.getElementById("products");
+
+        lines.forEach(line => {
+          const [name, price, image, whatsapp, description] = line.split(",");
+
+          const productDiv = document.createElement("div");
+          productDiv.className = "product";
+          productDiv.innerHTML = `
+            <img src="${image}" alt="${name}">
+            <h3>${name}</h3>
+            <p class="price">${price}</p>
+            <p>${description}</p>
+            <a class="whatsapp-btn" href="${whatsapp}" target="_blank">Commander sur WhatsApp</a>
+          `;
+          container.appendChild(productDiv);
+        });
+      })
+      .catch(error => console.error("Erreur lors du chargement des produits:", error));
+  </script>
+</body>
+</html>

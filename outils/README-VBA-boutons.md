@@ -26,6 +26,16 @@ Les boutons sont opérationnels.
 > **Fichier → Options → Centre de gestion de la confidentialité → Paramètres →
 > Paramètres des macros** et cochez *Accès approuvé au modèle d'objet du projet VBA*.
 
+## 1 bis. Mettre à jour le code déjà importé
+
+Si vous avez déjà importé une version précédente, **supprimez d'abord les anciens
+modules**, sinon Excel signalera « Nom ambigu détecté » :
+
+1. **Alt + F11**, dans l'arborescence de gauche, clic droit sur `mdlOutils` →
+   **Supprimer mdlOutils** → **Non** (ne pas exporter). Idem pour `mdlFacturation`
+   et `mdlBases`.
+2. Réimporter les trois `.bas` comme à l'étape 4 ci-dessus, puis enregistrer.
+
 ## 2. Ce que fait chaque bouton
 
 ### Onglet FACTURE-PROFORMA

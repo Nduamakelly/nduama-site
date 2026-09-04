@@ -143,6 +143,7 @@ Private Sub EnregistrerDocument(valide As Boolean)
     End If
 
     Application.ScreenUpdating = False
+    On Error GoTo Nettoyage
 
     ' ---------- on efface une éventuelle version précédente ---------------
     SupprimerLignesDocument numDoc
@@ -221,7 +222,7 @@ Private Sub EnregistrerDocument(valide As Boolean)
         End If
     Else
         Deverrouiller wsD
-        wsD.Range("I40").Value = numDoc
+        EcrireCellule wsD, "I40", numDoc
         wsD.Range("I5").Value = "BROUILLON"
         Verrouiller wsD
         Info "Brouillon " & numDoc & " enregistré dans HISTORIQUE DOCS." & vbNewLine & _
@@ -229,6 +230,14 @@ Private Sub EnregistrerDocument(valide As Boolean)
              "Vous pouvez continuer à le modifier : le prochain enregistrement " & _
              "remplacera ces lignes au lieu d'en ajouter."
     End If
+
+    Exit Sub
+
+Nettoyage:
+    Application.ScreenUpdating = True
+    Alerte "L'enregistrement s'est interrompu." & vbNewLine & vbNewLine & _
+           "Erreur " & Err.Number & " : " & Err.Description & vbNewLine & vbNewLine & _
+           "Vérifiez HISTORIQUE DOCS : le document a pu être enregistré partiellement."
 End Sub
 
 
@@ -298,9 +307,9 @@ Private Sub ViderFormulaire()
     ws.Range("B" & LIGNE_ART_DEB & ":B" & LIGNE_ART_FIN).ClearContents
     ws.Range("D" & LIGNE_ART_DEB & ":D" & LIGNE_ART_FIN).ClearContents
     ws.Range("H" & LIGNE_ART_DEB & ":I" & LIGNE_ART_FIN).Value = 0
-    ws.Range("A26").Value = "Saisir ici les observations, garanties ou conditions particulières."
-    ws.Range("C8").ClearContents
-    ws.Range("I40").ClearContents
+    EcrireCellule ws, "A26", "Saisir ici les observations, garanties ou conditions particulières."
+    ViderCellule ws, "C8"
+    ViderCellule ws, "I40"
     ws.Range("I5").Value = "BROUILLON"
     ws.Range("F7").Value = Date
     ws.Range("F7").NumberFormat = "dd/mm/yyyy"

@@ -142,6 +142,32 @@ Public Sub RestaurerFormulesHistorique()
 End Sub
 
 
+' Écrit une valeur dans une cellule, qu'elle soit fusionnée ou non.
+' Excel refuse toute écriture qui ne couvre pas la totalité d'une fusion :
+' on vise donc systématiquement la zone fusionnée complète.
+Public Sub EcrireCellule(ws As Worksheet, adresse As String, valeur As Variant)
+    Dim c As Range
+    Set c = ws.Range(adresse)
+    If c.MergeCells Then
+        c.MergeArea.Cells(1, 1).Value = valeur
+    Else
+        c.Value = valeur
+    End If
+End Sub
+
+
+' Vide une cellule, qu'elle soit fusionnée ou non.
+Public Sub ViderCellule(ws As Worksheet, adresse As String)
+    Dim c As Range
+    Set c = ws.Range(adresse)
+    If c.MergeCells Then
+        c.MergeArea.ClearContents
+    Else
+        c.ClearContents
+    End If
+End Sub
+
+
 Public Sub Alerte(message As String)
     MsgBox message, vbExclamation, TITRE
 End Sub

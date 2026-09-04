@@ -34,9 +34,10 @@ Le document tient donc à **100 % d'échelle**, sans réduction.
 Elles restent visibles à l'écran mais sortent de la zone d'impression :
 
 - `I3` TYPE DOCUMENT (FACTURE / PROFORMA) — pilote le titre, le n° de document et la mention de bas de page
-- `I4` STATUT (BROUILLON / VALIDÉ / ANNULÉ)
-- `I5` Marge % par défaut
+- `I5` STATUT (BROUILLON / VALIDÉ / ANNULÉ)
+- `I6` Marge % par défaut
 - `I9` Contrôle de stock, `I11` nombre de lignes remplies
+- `I38`/`I39`/`I40` numérotation : préfixe, prochain numéro, document en cours
 - Par ligne d'article : Transport, Autres frais, Stock disponible, Marge %, Alerte stock
 - Boutons de la maquette (Valider & imprimer / Brouillon / Nouveau document)
 
@@ -49,7 +50,7 @@ cellules de saisie restent modifiables. Sur la facture, les cellules de saisie o
 **fond gris clair**.
 
 Cellules ouvertes sur FACTURE-PROFORMA :
-`I3`, `I4`, `I5`, `F7` (date), `F8` (lieu), `C8` (ID client), `A26` (observations),
+`I3`, `I5`, `I6`, `I40`, `F7` (date), `F8` (lieu), `C8` (ID client), `A26` (observations),
 `B15:B24` (réf. article), `D15:D24` (quantité), `H15:I24` (transport / autres frais).
 
 Sur les autres onglets, seules les colonnes de saisie sont ouvertes (les colonnes calculées
@@ -72,13 +73,19 @@ Aucun mot de passe n'a été posé : pour modifier une formule, il suffit de fai
   chaque article, et « Ventes du mois » suit le mois en cours au lieu d'une date figée
 - Formats de nombres complétés (quantités, montants) et onglets colorés
 
-## 4. Vérification
+## 4. Boutons VBA
+
+Le classeur `.xlsm` porte les 6 boutons cliquables reliés à leurs macros.
+Voir `README-VBA-boutons.md` pour l'import du code (dossier `vba/`) et le détail
+de chaque bouton.
+
+## 5. Vérification
 
 - Recalcul complet du classeur : **5 071 formules, 0 erreur**.
 - Export d'impression : **1 seule page, 148 × 210 mm (A5 portrait exact)** — voir
   `apercu-facture-A5.pdf` / `apercu-facture-A5.png` (aperçu avec 3 lignes d'exemple).
 
-## 5. Point à valider avant utilisation réelle
+## 6. Point à valider avant utilisation réelle
 
 **La marge est comptée deux fois dans le total.** Ce comportement vient de la maquette
 d'origine, il n'a pas été modifié :

@@ -113,7 +113,7 @@ widths = {'A': 4.2, 'B': 12.0, 'C': 25.5, 'D': 5.5, 'E': 10.0, 'F': 11.5,
 for col, w in widths.items():
     ws.column_dimensions[col].width = w
 
-heights = {1: 24, 2: 12, 3: 12, 4: 5, 5: 22, 6: 5, 7: 16, 8: 16, 9: 14,
+heights = {1: 24, 2: 12, 3: 12, 4: 5, 5: 22, 6: 15, 7: 16, 8: 16, 9: 14,
            10: 15, 11: 15, 12: 15, 13: 6, 14: 16,
            25: 14, 26: 15, 27: 18, 28: 15, 29: 6,
            30: 16, 31: 16, 32: 16, 33: 5, 34: 14}
@@ -167,9 +167,7 @@ for rng in ('A7:B7', 'C7:D7', 'A8:B8', 'C8:D8', 'A9:F9',
     ws.merge_cells(rng)
 
 label('A7:B7', 'N° Document')
-champ('C7:D7',
-      '=IF($I$3="FACTURE",PARAMETRES!$B$11,PARAMETRES!$B$12)&"-"&PARAMETRES!$B$10&"-"'
-      '&TEXT(COUNTIF(\'HISTORIQUE DOCS\'!$C$4:$C$1000,$I$3)+1,"000")')
+champ('C7:D7', '=IF($I$40="",$I$38&TEXT($I$39,"000"),$I$40)')
 style(ws, 'C7', F(9, True))
 label('E7', 'Date')
 champ('F7', __import__('datetime').datetime(2026, 9, 1), saisie=True, align=C_, fmt=DATE)
@@ -219,7 +217,7 @@ for i, r in enumerate(range(PREM_LIGNE, DERN_LIGNE + 1), start=1):
     ws[f'H{r}'] = 0
     ws[f'I{r}'] = 0
     ws[f'J{r}'] = f'=IFERROR(VLOOKUP($B{r},{ART},13,FALSE),"")'
-    ws[f'K{r}'] = f'=IFERROR(VLOOKUP($B{r},{ART},9,FALSE),$I$5)'
+    ws[f'K{r}'] = f'=IFERROR(VLOOKUP($B{r},{ART},9,FALSE),$I$6)'
     ws[f'L{r}'] = (f'=IF(OR($B{r}="",$D{r}=""),"",IF(N($J{r})<N($D{r}),'
                    f'"STOCK INSUFFISANT","OK"))')
 
@@ -280,10 +278,10 @@ ws['H1'] = 'ZONE DE TRAVAIL — COLONNES G À L NON IMPRIMÉES'
 style(ws, 'H1:L1', F(9, True, BLANC), bg=NOIR, align=C_)
 
 interne = [('H3', 'TYPE DOCUMENT', 'I3', 'FACTURE', 'General'),
-           ('H4', 'STATUT',        'I4', 'BROUILLON', 'General'),
-           ('H5', 'Marge % défaut','I5', 0.3, PCT),
-           ('H6', 'Devise',        'I6', '=PARAMETRES!$B$8', 'General'),
-           ('H7', 'Année',         'I7', '=PARAMETRES!$B$10', '0')]
+           ('H5', 'STATUT',        'I5', 'BROUILLON', 'General'),
+           ('H6', 'Marge % défaut','I6', 0.3, PCT),
+           ('H7', 'Année',         'I7', '=PARAMETRES!$B$10', '0'),
+           ('H8', 'Devise',        'I8', '=PARAMETRES!$B$8', 'General')]
 for lab_ref, lab_txt, val_ref, val, fmt in interne:
     ws[lab_ref] = lab_txt
     style(ws, lab_ref, F(9, True, BLANC), bg=ROUGE,
@@ -321,8 +319,8 @@ style(ws, f'J{PREM_LIGNE}:J{DERN_LIGNE}', fmt='0')
 style(ws, f'K{PREM_LIGNE}:K{DERN_LIGNE}', fmt=PCT)
 
 boutons = [('H26:L27', '✅ VALIDER & IMPRIMER — PDF A5 + Historique + Sortie de stock', NOIR),
-           ('H28:L29', '🧾 ENREGISTRER BROUILLON — sans sortie de stock', GRIS2),
-           ('H30:L31', '🧹 NOUVEAU DOCUMENT — formulaire vierge', GRIS)]
+           ('H28:L30', '🧾 ENREGISTRER BROUILLON — sans sortie de stock', GRIS2),
+           ('H31:L32', '🧹 NOUVEAU DOCUMENT — formulaire vierge', GRIS)]
 for rng, txt, couleur in boutons:
     ws.merge_cells(rng)
     ws[rng.split(':')[0]] = txt
@@ -337,6 +335,29 @@ ws['H33'] = ('MAQUETTE — Dans la version finale automatisée, « VALIDER & IMP
              '(transport, autres frais, stock, marge).')
 style(ws, 'H33:L36', F(8, color=NOTE_FG), bg=NOTE_BG, align=LW, border=box)
 
+# ---------------------------------------------------------------- numérotation (zone interne)
+numerotation = [
+    ('H38', 'Préfixe document', 'I38',
+     '=IF($I$3="FACTURE",PARAMETRES!$B$11,PARAMETRES!$B$12)&"-"&PARAMETRES!$B$10&"-"'),
+    ('H39', 'Prochain numéro', 'I39',
+     "=SUMPRODUCT(MAX((LEFT('HISTORIQUE DOCS'!$B$4:$B$1000,LEN($I$38))=$I$38)"
+     "*IFERROR(VALUE(RIGHT('HISTORIQUE DOCS'!$B$4:$B$1000,3)),0)))+1"),
+    ('H40', 'Document en cours', 'I40', None),
+]
+for lab_ref, lab_txt, val_ref, val in numerotation:
+    ws[lab_ref] = lab_txt
+    style(ws, lab_ref, F(9, True, BLANC), bg=GRIS2,
+          align=Alignment(horizontal='left', vertical='center', indent=1), border=box)
+    ws.merge_cells(f'{val_ref}:{chr(ord(val_ref[0]) + 2)}{val_ref[1:]}')
+    ws[val_ref] = val
+    style(ws, f'{val_ref}:{chr(ord(val_ref[0]) + 2)}{val_ref[1:]}',
+          F(9), bg=CLAIR, align=C_, border=box)
+ws['I39'].number_format = '0'
+ws.merge_cells('H42:L44')
+ws['H42'] = ('« Document en cours » est rempli par la macro quand un brouillon est enregistré : '
+             'le document garde alors son numéro tant qu’il n’est pas validé ou remis à zéro.')
+style(ws, 'H42:L44', F(8, i=True, color=GRIS), bg=NOTE_BG, align=LW, border=box)
+
 # ---------------------------------------------------------------- validations
 dv_type = DataValidation(type='list', formula1='"FACTURE,PROFORMA"', allow_blank=False)
 dv_stat = DataValidation(type='list', formula1='"BROUILLON,VALIDÉ,ANNULÉ"', allow_blank=False)
@@ -347,7 +368,7 @@ dv_qte  = DataValidation(type='whole', operator='greaterThanOrEqual', formula1='
                          errorTitle='Quantité invalide')
 for dv in (dv_type, dv_stat, dv_cli, dv_art, dv_qte):
     ws.add_data_validation(dv)
-dv_type.add('I3'); dv_stat.add('I4'); dv_cli.add('C8')
+dv_type.add('I3'); dv_stat.add('I5'); dv_cli.add('C8')
 dv_art.add(f'B{PREM_LIGNE}:B{DERN_LIGNE}')
 dv_qte.add(f'D{PREM_LIGNE}:D{DERN_LIGNE}')
 
@@ -419,6 +440,34 @@ mise_en_page(par, paysage=False, titres=None)
 par.print_area = 'A1:B18'
 par.sheet_view.showGridLines = False
 
+# formulaires latéraux : colonnes assez larges pour que les libellés
+# tiennent sur une ligne (sinon la hauteur de ligne varie et les boutons
+# flottants ne restent pas alignés sur leurs cellules)
+formulaires = {
+    'BASE CLIENTS':  (('O', 20), ('P', 24), 'O3:P13', (14, 15)),
+    'BASE ARTICLES': (('R', 22), ('S', 24), 'R3:S14', (15, 16)),
+    'ENTREES STOCK': (('A', 22), ('B', 24), 'A3:B11', (13, 14)),
+}
+for nom, (c1, c2, plage, lignes_bouton) in formulaires.items():
+    f = wb[nom]
+    f.column_dimensions[c1[0]].width = c1[1]
+    f.column_dimensions[c2[0]].width = c2[1]
+    for row in f[plage]:
+        for c in row:
+            al = copy(c.alignment)
+            al.wrap_text = False
+            c.alignment = al
+    for r in lignes_bouton:
+        f.row_dimensions[r].height = 19
+
+# colonnes de dates : assez larges pour éviter les ###
+for nom, colonnes in (('ENTREES STOCK', ('D',)), ('HISTORIQUE DOCS', ('A', 'B')),
+                      ('JOURNAL STOCK', ('A', 'E'))):
+    f = wb[nom]
+    for col in colonnes:
+        if (f.column_dimensions[col].width or 0) < 13:
+            f.column_dimensions[col].width = 13
+
 # formats manquants
 ba = wb['BASE ARTICLES']
 for r in range(4, 501):
@@ -464,7 +513,7 @@ def proteger(ws):
 
 # --- FACTURE-PROFORMA : saisie = type/statut/marge, date, lieu, client,
 #     réf. article, quantité, transport, autres frais, observations
-deverrouiller(ws, 'I3', 'I4', 'I5', 'F7', 'F8', 'C8:D8', 'A26:C27',
+deverrouiller(ws, 'I3', 'I5', 'I6', 'F7', 'F8', 'C8:D8', 'A26:C27', 'I40:K40',
               f'B{PREM_LIGNE}:B{DERN_LIGNE}',
               f'D{PREM_LIGNE}:D{DERN_LIGNE}',
               f'H{PREM_LIGNE}:I{DERN_LIGNE}')

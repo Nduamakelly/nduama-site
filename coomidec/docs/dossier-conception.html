@@ -73,6 +73,9 @@ a{color:var(--copper)}
   border-left:2px solid var(--rust);padding:2px 0 2px 12px;
 }
 .rail-note b{color:var(--rust);display:block;font-family:Archivo,sans-serif;font-size:13px}
+.rail-note.ok{border-left-color:var(--jade)}
+.rail-note.ok b{color:var(--jade)}
+.rail-note code{font-family:"IBM Plex Mono",monospace;font-size:.9em}
 
 /* ---------- masthead ---------- */
 .masthead{padding:56px 0 32px;border-bottom:1px solid var(--rule-strong)}
@@ -214,6 +217,9 @@ td code,p code,li code{font-family:"IBM Plex Mono",monospace;font-size:.88em;bac
   padding:3px 9px;border-radius:3px;background:var(--surface-2);color:var(--muted);border:1px solid var(--rule);
 }
 .q.block .qid{background:var(--rust);color:#fff;border-color:var(--rust)}
+.q.done .qid{background:var(--jade);color:#fff;border-color:var(--jade)}
+.q .decision{margin-top:10px;font-size:14px;color:var(--ink-2);background:var(--jade-soft);border-left:3px solid var(--jade);padding:10px 13px;border-radius:0 3px 3px 0}
+.q .decision b{color:var(--jade);font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:3px}
 .q h4{font-size:15.5px;font-weight:600;margin-bottom:6px}
 .q p{font-size:14px;color:var(--muted);line-height:1.55}
 .q .reco{margin-top:9px;font-size:13.5px;color:var(--ink-2);border-left:2px solid var(--jade);padding-left:11px}
@@ -232,6 +238,8 @@ td code,p code,li code{font-family:"IBM Plex Mono",monospace;font-size:.88em;bac
 .mod .mid{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--copper);letter-spacing:.08em}
 .mod .mt{font-size:14px;font-weight:500;color:var(--ink);line-height:1.35}
 .mod .mc{font-size:12px;color:var(--faint);font-family:"IBM Plex Mono",monospace}
+.mod.done{border-color:var(--jade);background:var(--jade-soft)}
+.mod.done .mid,.mod.done .mc{color:var(--jade)}
 
 /* ---------- close ---------- */
 .closing{margin-top:72px;padding:30px 0 0;border-top:1px solid var(--rule-strong);max-width:68ch;display:flex;flex-direction:column;gap:14px}
@@ -244,16 +252,16 @@ li::marker{color:var(--copper)}
 <header class="masthead">
   <div class="mast-top">
     <span class="org">COOMIDEC</span>
-    <span class="mast-meta">Dossier de conception · v1 · 9 septembre 2026</span>
+    <span class="mast-meta">Dossier de conception · v2 · 9 septembre 2026</span>
   </div>
   <h1>Gestion des opérations de site</h1>
-  <p class="lede">Remplacement du classeur <em>Système Simplifié Gestion Site</em> par une application tablette <em>offline-first</em>. Le classeur a été décodé formule par formule : voici l'architecture, le modèle de données, les écrans, le moteur de calcul — et les vingt points métier à trancher avant d'écrire la première ligne de code.</p>
+  <p class="lede">Remplacement du classeur <em>Système Simplifié Gestion Site</em> par une application tablette <em>offline-first</em>. Le classeur a été décodé formule par formule. Les quatre questions bloquantes sont <em>tranchées</em>, et le moteur de calcul est écrit et testé.</p>
   <dl class="mast-strip">
     <div><dt>Source analysée</dt><dd>5 feuilles, 220 lignes</dd></div>
-    <div><dt>Règle de calcul</dt><dd>QTY × coût/unité × % coût</dd></div>
+    <div><dt>Règle validée</dt><dd>QTY × teneur × prix / 1 %</dd></div>
     <div><dt>Tables proposées</dt><dd>12 + outbox locale</dd></div>
     <div><dt>Écrans</dt><dd>9</dd></div>
-    <div><dt>À valider</dt><dd style="color:var(--rust)">4 questions bloquantes</dd></div>
+    <div><dt>Moteur de calcul</dt><dd style="color:var(--jade)">livré · 43 tests</dd></div>
   </dl>
 </header>
 
@@ -272,9 +280,9 @@ li::marker{color:var(--copper)}
         <a href="#livraison"><span>›</span><span>Livraison</span></a>
       </nav>
     </div>
-    <div class="rail-note">
-      <b>Avant M0</b>
-      Q1, Q4, Q5 et Q8 doivent être tranchées : elles conditionnent le moteur de calcul et le modèle de données.
+    <div class="rail-note ok">
+      <b>Décidé</b>
+      D1, D4, D5 et D8 sont tranchées. Reste une précision sur <code>% coût</code> en méthode B, qui ne bloque rien.
     </div>
   </aside>
 
@@ -319,12 +327,12 @@ li::marker{color:var(--copper)}
         <tr>
           <td><strong>Seule la méthode « barème par tranches » existe.</strong> La méthode « prix par 1 % » n'est nulle part dans le fichier.</td>
           <td>Ce n'est pas une reprise, c'est une nouveauté à spécifier.</td>
-          <td>Deux méthodes au choix par matière première <span class="pill wait">Q17</span></td>
+          <td>Devenue la <strong>méthode de référence</strong> <span class="pill ok">D4</span></td>
         </tr>
         <tr>
           <td><strong>Un troisième facteur <code>% COÛT</code></strong> multiplie le montant, sans définition écrite.</td>
-          <td>Part coopérative ? rendement ? décote qualité ? Le rapport ne peut pas être libellé sans le savoir.</td>
-          <td>Conservé tel quel, définition à obtenir <span class="pill err">Q4</span></td>
+          <td>Part coopérative ? rendement ? décote qualité ?</td>
+          <td>Facteur configurable, <code>1</code> par défaut <span class="pill wait">précision attendue</span></td>
         </tr>
         <tr>
           <td><strong>Modifier un prix recalcule tout l'historique</strong>, puisque le barème n'est pas horodaté.</td>
@@ -703,14 +711,14 @@ ON CONFLICT (id) DO UPDATE SET ...
       <thead><tr><th>Méthode</th><th>Formule par défaut</th><th>Origine</th></tr></thead>
       <tbody>
         <tr>
-          <td><strong>B — Barème par tranches</strong></td>
-          <td><code>QTY * COUT_UNITAIRE * PCT_COUT</code></td>
-          <td>Transposition exacte du classeur</td>
+          <td><strong>A — Prix par 1 %</strong><br><span style="color:var(--muted);font-size:13px">méthode de référence</span></td>
+          <td><code>QTY * VALEUR_TENEUR * PCT_COUT</code><br><span style="color:var(--muted);font-size:13px"><code>VALEUR_TENEUR = TENEUR × PRIX_PAR_POURCENT</code></span></td>
+          <td><span class="pill ok">D4 — cuivre 1 % = 140 USD</span></td>
         </tr>
         <tr>
-          <td><strong>A — Prix par 1 %</strong></td>
-          <td><code>QTY * TENEUR * PRIX_PAR_POURCENT * PCT_COUT</code></td>
-          <td><span class="pill wait">Nouveauté — Q17</span></td>
+          <td><strong>B — Barème par tranches</strong></td>
+          <td><code>QTY * COUT_UNITAIRE * PCT_COUT</code></td>
+          <td>Transposition exacte du classeur, conservée pour continuité</td>
         </tr>
       </tbody>
     </table>
@@ -763,42 +771,43 @@ ON CONFLICT (id) DO UPDATE SET ...
       <span class="eyebrow">9 sept. 2026 · 08:14</span>
     </div>
     <div class="trace-body">
-<pre><i>Matière</i>          Cuivre · méthode BAREME_TRANCHES · USD
-<i>Barème actif</i>     <b>[3,00 % – 4,00 %)</b>   coût/unité <b>120,0000</b>   % coût <b>85 %</b>
+<pre><i>Matière</i>          Cuivre · méthode PRIX_PAR_POURCENT · USD
+<i>Tarif de référence</i>  1 % de teneur = <b>140,0000 USD</b>      % coût <b>1</b>
 <i>Saisie agent</i>     QTY <b>12,500 T</b>        teneur <b>3,200 %</b>
 ────────────────────────────────────────────────────────────────
-<i>tranche résolue</i>  [3,00 – 4,00)        <u>✓ 3,200 appartient à la tranche</u>
-<i>formule</i>          QTY × COUT_UNITAIRE × PCT_COUT
-<i>montant brut</i>     12,5 × 120,0000 × 0,85  =  1 275,0000
+<i>valeur de teneur</i>  3,200 × 140,0000  =  <u>448,0000 USD le point</u>
+<i>formule</i>          QTY × VALEUR_TENEUR × PCT_COUT
+<i>montant brut</i>     12,5 × 448,0000 × 1  =  5 600,0000
 <i>arrondi</i>          commercial half-up, 2 décimales</pre>
     </div>
     <div class="trace-total">
-      <span class="lbl">Montant enregistré</span>
-      <span class="amt">1 275,00<small>USD</small></span>
+      <span class="lbl">Valeur de production enregistrée</span>
+      <span class="amt">5 600,00<small>USD</small></span>
     </div>
   </div>
 
   <div class="prose" style="margin-top:30px">
     <h3>Le lendemain, le tarif change</h3>
-    <p>Le coût unitaire du cuivre passe de 120 à 130 USD dans Paramètres. La ligne de barème est fermée, une nouvelle est ouverte, une entrée <code>CHANGEMENT_TARIF</code> est écrite dans le journal d'audit avec ancienne valeur, nouvelle valeur, auteur et motif.</p>
+    <p>Le prix du point de teneur du cuivre passe de 140 à 150 USD dans Paramètres. La ligne tarifaire est fermée, une nouvelle est ouverte, une entrée <code>CHANGEMENT_TARIF</code> est écrite dans le journal d'audit avec ancienne valeur, nouvelle valeur, auteur et motif.</p>
   </div>
 
   <div class="frozen">
     <div class="frozen-card same">
       <span class="eyebrow">Opération du 9 septembre</span>
-      <div class="v">1 275,00 USD</div>
-      <p class="n">Inchangée. Son snapshot porte <code>120,0000</code> et <code>0,85</code> — la table des barèmes n'est jamais relue.</p>
+      <div class="v">5 600,00 USD</div>
+      <p class="n">Inchangée. Son snapshot porte <code>140,0000</code> — la table des tarifs n'est jamais relue.</p>
     </div>
     <div class="frozen-card">
       <span class="eyebrow">Opération du 10 septembre</span>
-      <div class="v">1 381,25 USD</div>
-      <p class="n">Nouveau tarif appliqué : <code>12,5 × 130,0000 × 0,85</code>.</p>
+      <div class="v">6 000,00 USD</div>
+      <p class="n">Nouveau tarif appliqué : <code>12,5 × (3,2 × 150,0000)</code>.</p>
     </div>
   </div>
 
   <div class="callout" style="margin-top:22px">
     <span class="eyebrow">TEST 3 — trois barrières indépendantes</span>
     <p><strong>1.</strong> Le snapshot : l'opération porte son tarif, l'affichage lit le snapshot. <strong>2.</strong> L'historisation : un tarif n'est jamais modifié en place, l'ancienne valeur reste vérifiable. <strong>3.</strong> L'absence de recalcul : aucun chemin de code ne recalcule une opération existante — une correction contrôlée crée une nouvelle version tracée, elle ne réécrit pas l'ancienne.</p>
+    <p style="color:var(--jade);font-weight:500">✓ Vérifié : <code>packages/core/tests/immuabilite.test.ts</code> — 43 tests au vert.</p>
   </div>
 
   <div class="prose" style="margin-top:28px">
@@ -831,45 +840,50 @@ ON CONFLICT (id) DO UPDATE SET ...
     <div class="sec-letter">F</div>
     <div>
       <h2>Risques et questions métier</h2>
-      <p class="sub">Vingt points relevés. Quatre bloquent le démarrage du développement.</p>
+      <p class="sub">Vingt points relevés. Les quatre bloquants sont tranchés ; les autres ont une recommandation appliquée par défaut.</p>
     </div>
   </div>
 
   <div class="prose">
-    <p><strong>Bloquant</strong> signifie ici : le module concerné ne peut pas être écrit sans la réponse, et le construire sur une hypothèse coûterait une réécriture.</p>
+    <p><strong>Bloquant</strong> signifiait ici : le module concerné ne peut pas être écrit sans la réponse, et le construire sur une hypothèse coûterait une réécriture. Les quatre sont désormais décidés, et la décision est appliquée dans le code.</p>
   </div>
 
   <div class="qgroup" style="margin-top:22px">
-    <div class="q block">
-      <span class="qid">Q4</span>
+    <div class="q done">
+      <span class="qid">D4</span>
       <div>
-        <h4>Que signifie exactement <code>% COÛT</code> ?</h4>
-        <p>La colonne <code>PARAMETRES!H</code> multiplie le montant, mais rien dans le fichier n'en donne la définition. Part revenant à la coopérative sur la valeur du minerai ? Rendement ou taux de récupération technique ? Décote qualité appliquée au prix de référence ? Les trois lectures ont des conséquences comptables très différentes, et l'intitulé du rapport journalier ne peut pas être écrit sans trancher.</p>
+        <h4>La référence tarifaire est un prix par 1 % de teneur</h4>
+        <p>La colonne <code>PARAMETRES!H</code> multipliait le montant sans définition écrite.</p>
+        <div class="decision"><b>Décision</b>« C'est la valeur qui représente la matière première ; par exemple Cuivre, teneur 1 % = 140 $ ». La <strong>méthode A</strong> devient la méthode de référence : <code>valeurTeneur = TENEUR × PRIX_PAR_POURCENT</code>. La méthode B reste disponible par matière, pour la continuité avec le classeur.</div>
+        <p style="margin-top:10px"><span class="pill wait">Précision attendue</span> Le rôle exact de <code>% COÛT</code> en méthode B reste à confirmer : teneur retenue pour la tranche, ou facteur distinct qui s'applique en plus ? Le moteur implémente les deux, avec <code>1</code> par défaut — c'est un réglage de PARAMÈTRES, pas une livraison.</p>
       </div>
     </div>
 
-    <div class="q block">
-      <span class="qid">Q5</span>
+    <div class="q done">
+      <span class="qid">D5</span>
       <div>
-        <h4>« Coût » ou « valeur » ?</h4>
-        <p>Le fichier dit <code>COÛT CALCULÉ</code>. S'agit-il de ce que <strong>COOMIDEC paie</strong> au creuseur pour le minerai, ou de la <strong>valeur estimée</strong> de la production ? Le même nombre ne se lit pas de la même façon dans un rapport de production et dans un journal de trésorerie.</p>
+        <h4>Le montant est une valeur de production</h4>
+        <p>Le fichier dit <code>COÛT CALCULÉ</code> — décaissement ou valeur estimée ?</p>
+        <div class="decision"><b>Décision</b><strong>Valeur de la production.</strong> Les écrans, le rapport journalier et le tableau de bord parlent désormais de « VALEUR », pas de « coût ». Le rapport journalier est un rapport de production, pas un journal d'achats : aucun rapprochement de trésorerie n'est attendu de l'application.</div>
       </div>
     </div>
 
-    <div class="q block">
-      <span class="qid">Q1</span>
+    <div class="q done">
+      <span class="qid">D1</span>
       <div>
-        <h4>Teneur moyenne : arithmétique ou pondérée par la QTY ?</h4>
+        <h4>Teneur moyenne : les deux, affichées côte à côte</h4>
         <p>Le classeur calcule <code>SUMIF(teneur)/COUNTIF</code>, une moyenne arithmétique simple. Pour du minerai, c'est statistiquement faux : une opération de 0,5 t à 8 % y pèse autant qu'une opération de 40 t à 2 %.</p>
-        <div class="reco"><b>Recommandation</b>La teneur moyenne du site devient la moyenne pondérée <code>Σ(qty × teneur) / Σ qty</code>, et la moyenne arithmétique reste affichée à côté, explicitement libellée, pour la continuité avec le classeur.</div>
+        <div class="decision"><b>Décision</b>Indicateur principal : moyenne <strong>pondérée par la QTY</strong>, <code>Σ(qty × teneur) / Σ qty</code>. La moyenne arithmétique reste affichée à côté, explicitement libellée, pour que les chiffres restent rapprochables de ceux du classeur. Sur l'exemple ci-dessus : <strong>2,074 %</strong> pondérée contre <strong>5 %</strong> arithmétique.</div>
       </div>
     </div>
 
-    <div class="q block">
-      <span class="qid">Q8</span>
+    <div class="q done">
+      <span class="qid">D8</span>
       <div>
-        <h4>Une opération est-elle rattachée à un creuseur ?</h4>
-        <p>Le classeur n'établit <strong>aucun lien</strong> entre <code>BASE CREUSEURS</code> et <code>SAISIE JOURNALIERE</code>. Une opération correspond-elle à un creuseur — donc base d'une rémunération individuelle — à une équipe, ou à un lot / camion / sac sans attribution nominative ? La réponse détermine si <code>creuseur_id</code> est obligatoire, facultatif ou inutile, et si l'application devient un outil de paie, ce qui élargirait son périmètre.</p>
+        <h4>Chaque opération est nominative</h4>
+        <p>Le classeur n'établissait <strong>aucun lien</strong> entre <code>BASE CREUSEURS</code> et <code>SAISIE JOURNALIERE</code>.</p>
+        <div class="decision"><b>Décision</b><code>operations.creuseur_id</code> devient <strong><code>NOT NULL</code></strong>. Le rapport journalier gagne une ventilation par creuseur, et la saisie un quatrième champ obligatoire — les creuseurs récents de l'équipe en cours sont proposés en accès direct pour tenir l'objectif de rapidité.</div>
+        <p style="margin-top:10px"><span class="pill wait">Conséquence</span> L'application devient de fait une <strong>base de rémunération individuelle</strong> : les contestations porteront sur ses chiffres. Cela renforce l'exigence sur le journal d'audit et sur la signature (Q12), et rend Q13 — carte artisanale expirée — nettement plus sensible.</p>
       </div>
     </div>
   </div>
@@ -885,7 +899,7 @@ ON CONFLICT (id) DO UPDATE SET ...
     <div class="q"><span class="qid">Q10</span><div><h4>Clôturer avec des opérations non synchronisées</h4><div class="reco"><b>Recommandation</b>Autoriser, marquer le rapport <code>PROVISOIRE</code> en filigrane et enregistrer le nombre d'opérations concernées dans la clôture. Faut-il au contraire bloquer ?</div></div></div>
     <div class="q"><span class="qid">Q11</span><div><h4>Qui autorise une réouverture ?</h4><p>Rôle administrateur seul ? Double validation par deux personnes ? Fenêtre maximale, par exemple sept jours après la clôture ?</p></div></div>
     <div class="q"><span class="qid">Q13</span><div><h4>Carte artisanale expirée</h4><p>Une opération peut-elle être attribuée à un creuseur dont la carte est périmée ?</p><div class="reco"><b>Recommandation</b>Avertissement visible, enregistrement autorisé, mention au rapport — sauf obligation réglementaire imposant un blocage strict.</div></div></div>
-    <div class="q"><span class="qid">Q17</span><div><h4>Formule exacte de la méthode « prix par 1 % »</h4><p>Votre exemple s'arrête à <code>valeurTeneur = 3 × 120 = 360 USD</code>. La formule finale est-elle <code>QTY × valeurTeneur</code>, soit <code>12,5 × 360 = 4 500 USD</code> ? Et le <code>% coût</code> s'applique-t-il aussi dans cette méthode ?</p></div></div>
+    <div class="q"><span class="qid">Q17</span><div><h4>Le <code>% coût</code> s'applique-t-il aussi en méthode A ?</h4><p>La formule est retenue : <code>QTY × VALEUR_TENEUR × PCT_COUT</code>, avec <code>PCT_COUT = 1</code> par défaut. Reste à dire si un facteur autre que 1 doit pouvoir s'y appliquer.</p></div></div>
   </div>
 
   <div class="prose" style="margin-top:34px"><h3>À arbitrer plus tard</h3></div>
@@ -919,7 +933,7 @@ ON CONFLICT (id) DO UPDATE SET ...
   <div class="mods">
     <div class="mod"><span class="mid">M0</span><span class="mt">Socle</span><span class="mc">monorepo · CI · schéma · auth</span></div>
     <div class="mod"><span class="mid">M1</span><span class="mt">Paramètres et barèmes</span><span class="mc">simulateur intégré</span></div>
-    <div class="mod"><span class="mid">M2</span><span class="mt">Moteur de calcul</span><span class="mc">TEST 3 · TEST 4</span></div>
+    <div class="mod done"><span class="mid">M2 ✓</span><span class="mt">Moteur de calcul</span><span class="mc">livré · 43 tests</span></div>
     <div class="mod"><span class="mid">M3</span><span class="mt">Saisie hors ligne</span><span class="mc">TEST 1</span></div>
     <div class="mod"><span class="mid">M4</span><span class="mt">Synchronisation</span><span class="mc">TEST 2</span></div>
     <div class="mod"><span class="mid">M5</span><span class="mt">Opérations du jour</span><span class="mc">recherche · annulation</span></div>
@@ -947,8 +961,8 @@ ON CONFLICT (id) DO UPDATE SET ...
 
   <div class="closing">
     <span class="eyebrow">Prochaine étape</span>
-    <p>Validation des quatre questions bloquantes — <strong>Q1, Q4, Q5, Q8</strong> — puis démarrage du module <strong>M0</strong>.</p>
-    <p style="color:var(--muted);font-size:14px">Les autres points peuvent être tranchés au fil de l'eau : les recommandations par défaut sont appliquées et restent modifiables dans <em>Paramètres</em>, sans toucher au code.</p>
+    <p>Modules <strong>M0</strong> (socle API et PostgreSQL) et <strong>M1</strong> (paramètres, matières, barèmes historisés), puis <strong>M3</strong> (saisie hors ligne) et <strong>M4</strong> (synchronisation).</p>
+    <p style="color:var(--muted);font-size:14px">Un seul point reste à préciser avant la mise en production : le rôle exact de <code>% coût</code> en méthode B. Il ne bloque pas le développement — la formule est une donnée de configuration, modifiable dans <em>Paramètres</em> sans toucher au code.</p>
   </div>
 
 </section>

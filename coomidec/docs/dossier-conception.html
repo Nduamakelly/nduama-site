@@ -1,0 +1,958 @@
+<title>Architecture COOMIDEC</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --ground:#F0F2F1; --surface:#FFFFFF; --surface-2:#F7F8F8;
+  --ink:#15191A; --ink-2:#3A4446; --muted:#5F6A6C; --faint:#8B9698;
+  --rule:#D5DAD9; --rule-strong:#B6BFBE;
+  --copper:#A2501C; --copper-soft:#F2E4DA;
+  --jade:#146E56; --jade-soft:#DEECE7;
+  --amber:#8E6205; --amber-soft:#F4EAD4;
+  --rust:#9B2F26; --rust-soft:#F5E1DE;
+  --shadow:0 1px 2px rgba(20,28,28,.06), 0 6px 18px -10px rgba(20,28,28,.22);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1112; --surface:#151A1B; --surface-2:#1B2122;
+    --ink:#E5E9E8; --ink-2:#C3CBCA; --muted:#949F9F; --faint:#6E7A7A;
+    --rule:#28302F; --rule-strong:#3A4443;
+    --copper:#DE8B52; --copper-soft:#332116;
+    --jade:#54C09A; --jade-soft:#122822;
+    --amber:#D9A93F; --amber-soft:#2A2213;
+    --rust:#E0736A; --rust-soft:#2C1917;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1112; --surface:#151A1B; --surface-2:#1B2122;
+  --ink:#E5E9E8; --ink-2:#C3CBCA; --muted:#949F9F; --faint:#6E7A7A;
+  --rule:#28302F; --rule-strong:#3A4443;
+  --copper:#DE8B52; --copper-soft:#332116;
+  --jade:#54C09A; --jade-soft:#122822;
+  --amber:#D9A93F; --amber-soft:#2A2213;
+  --rust:#E0736A; --rust-soft:#2C1917;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px -12px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:Archivo,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0;line-height:1.18}
+p{margin:0}
+a{color:var(--copper)}
+:focus-visible{outline:2px solid var(--copper);outline-offset:3px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--faint);
+}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:56px;align-items:start}
+@media (max-width:940px){.layout{grid-template-columns:1fr;gap:0}.rail{display:none}}
+
+.rail{position:sticky;top:24px;padding-top:8px;display:flex;flex-direction:column;gap:20px}
+.rail-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-family:"IBM Plex Mono",monospace;font-weight:600}
+.rail nav{display:flex;flex-direction:column;gap:1px}
+.rail a{
+  display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:baseline;
+  text-decoration:none;color:var(--muted);font-size:13.5px;padding:6px 8px;
+  border-radius:3px;border-left:2px solid transparent;
+}
+.rail a:hover{color:var(--ink);background:var(--surface)}
+.rail a span:first-child{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--copper);font-size:12px}
+.rail-note{
+  font-size:12.5px;line-height:1.5;color:var(--muted);
+  border-left:2px solid var(--rust);padding:2px 0 2px 12px;
+}
+.rail-note b{color:var(--rust);display:block;font-family:Archivo,sans-serif;font-size:13px}
+
+/* ---------- masthead ---------- */
+.masthead{padding:56px 0 32px;border-bottom:1px solid var(--rule-strong)}
+.mast-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:22px}
+.org{
+  font-family:Archivo,sans-serif;font-weight:700;font-size:12px;letter-spacing:.2em;
+  color:var(--surface);background:var(--copper);padding:5px 10px;border-radius:2px;
+}
+.mast-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint);letter-spacing:.02em}
+h1{font-size:clamp(34px,5.4vw,58px);font-weight:700;letter-spacing:-.022em;max-width:16ch}
+.lede{margin-top:20px;font-size:19px;line-height:1.55;color:var(--ink-2);max-width:60ch}
+.lede em{font-style:normal;color:var(--copper);font-weight:600}
+.mast-strip{
+  display:flex;flex-wrap:wrap;gap:0;margin-top:34px;
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--surface);
+}
+.mast-strip div{
+  flex:1 1 150px;padding:13px 16px;border-right:1px solid var(--rule);
+}
+.mast-strip div:last-child{border-right:0}
+.mast-strip dt{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.mast-strip dd{margin:0;font-size:14.5px;font-weight:500;color:var(--ink)}
+
+/* ---------- sections ---------- */
+section{padding-top:64px;scroll-margin-top:20px}
+.sec-head{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;margin-bottom:26px}
+.sec-letter{
+  font-family:Archivo,sans-serif;font-weight:700;font-size:15px;color:var(--copper);
+  border:1.5px solid var(--copper);width:32px;height:32px;display:grid;place-items:center;
+  border-radius:50%;margin-top:4px;
+}
+.sec-head h2{font-size:clamp(24px,3.2vw,32px);font-weight:600;letter-spacing:-.016em}
+.sec-head .sub{margin-top:7px;color:var(--muted);font-size:15px;max-width:62ch}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:16px}
+.prose p{color:var(--ink-2)}
+.prose strong{color:var(--ink);font-weight:600}
+h3{font-size:17px;font-weight:600;margin-top:14px;letter-spacing:-.005em}
+
+/* ---------- callout ---------- */
+.callout{
+  border-left:3px solid var(--copper);background:var(--copper-soft);
+  padding:16px 20px;border-radius:0 4px 4px 0;max-width:68ch;
+  display:flex;flex-direction:column;gap:8px;
+}
+.callout .eyebrow{color:var(--copper)}
+.callout p{color:var(--ink-2);font-size:15px}
+.callout.warn{border-color:var(--rust);background:var(--rust-soft)}
+.callout.warn .eyebrow{color:var(--rust)}
+
+/* ---------- code / wide ---------- */
+.wide{margin:6px 0;overflow-x:auto;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+pre{
+  margin:0;padding:18px 20px;font-family:"IBM Plex Mono",monospace;font-size:13px;
+  line-height:1.72;color:var(--ink-2);white-space:pre;
+}
+pre b{color:var(--ink);font-weight:600}
+pre i{color:var(--faint);font-style:normal}
+pre u{text-decoration:none;color:var(--copper);font-weight:500}
+
+/* ---------- tables ---------- */
+.tablebox{overflow-x:auto;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+th{
+  text-align:left;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--faint);
+  padding:11px 16px;border-bottom:1px solid var(--rule-strong);white-space:nowrap;
+}
+td{padding:11px 16px;border-bottom:1px solid var(--rule);color:var(--ink-2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+td code,p code,li code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:3px;color:var(--ink)}
+.tablebox td code{background:transparent;padding:0}
+
+/* ---------- state pills ---------- */
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.08em;padding:3px 8px;border-radius:3px;white-space:nowrap;
+}
+.pill.ok{background:var(--jade-soft);color:var(--jade)}
+.pill.wait{background:var(--amber-soft);color:var(--amber)}
+.pill.err{background:var(--rust-soft);color:var(--rust)}
+.pill.lock{background:var(--surface-2);color:var(--muted);border:1px solid var(--rule)}
+
+/* ---------- calc trace (feature block) ---------- */
+.trace{
+  border:1px solid var(--rule-strong);border-radius:6px;background:var(--surface);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.trace-head{
+  padding:12px 20px;border-bottom:1px solid var(--rule);background:var(--surface-2);
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;
+}
+.trace-head .eyebrow{color:var(--muted)}
+.trace-body{overflow-x:auto}
+.trace-body pre{padding:22px 24px 8px}
+.trace-total{
+  display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;
+  padding:16px 24px 20px;margin-top:4px;border-top:1px solid var(--rule);
+}
+.trace-total .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.trace-total .amt{
+  font-family:Archivo,sans-serif;font-weight:700;font-size:34px;letter-spacing:-.02em;
+  color:var(--copper);font-variant-numeric:tabular-nums;
+}
+.trace-total .amt small{font-size:16px;font-weight:600;color:var(--muted);margin-left:6px;letter-spacing:0}
+
+.frozen{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:18px}
+.frozen-card{border:1px solid var(--rule);border-radius:5px;background:var(--surface);padding:16px 18px}
+.frozen-card.same{border-color:var(--jade);border-width:1.5px}
+.frozen-card .eyebrow{margin-bottom:9px}
+.frozen-card .v{font-family:Archivo,sans-serif;font-weight:700;font-size:25px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.frozen-card .n{margin-top:7px;font-size:13px;color:var(--muted);line-height:1.45}
+.frozen-card.same .v{color:var(--jade)}
+
+/* ---------- screens grid ---------- */
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.screen{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:7px}
+.screen .n{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--copper)}
+.screen h4{font-size:15.5px;font-weight:600}
+.screen p{font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* ---------- diagram ---------- */
+.diagram{border:1px solid var(--rule);border-radius:5px;background:var(--surface);padding:8px;overflow-x:auto}
+.diagram svg{display:block;min-width:660px;width:100%;height:auto}
+.d-box{fill:var(--surface-2);stroke:var(--rule-strong);stroke-width:1}
+.d-box-ok{fill:var(--jade-soft);stroke:var(--jade);stroke-width:1.2}
+.d-box-wait{fill:var(--amber-soft);stroke:var(--amber);stroke-width:1.2}
+.d-box-err{fill:var(--rust-soft);stroke:var(--rust);stroke-width:1.2}
+.d-t{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.06em;fill:var(--ink)}
+.d-t-ok{fill:var(--jade)} .d-t-wait{fill:var(--amber)} .d-t-err{fill:var(--rust)}
+.d-lbl{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--faint);letter-spacing:.03em}
+.d-line{stroke:var(--rule-strong);stroke-width:1.3;fill:none}
+
+/* ---------- questions ---------- */
+.qgroup{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.q{background:var(--surface);padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.qid{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  padding:3px 9px;border-radius:3px;background:var(--surface-2);color:var(--muted);border:1px solid var(--rule);
+}
+.q.block .qid{background:var(--rust);color:#fff;border-color:var(--rust)}
+.q h4{font-size:15.5px;font-weight:600;margin-bottom:6px}
+.q p{font-size:14px;color:var(--muted);line-height:1.55}
+.q .reco{margin-top:9px;font-size:13.5px;color:var(--ink-2);border-left:2px solid var(--jade);padding-left:11px}
+.q .reco b{color:var(--jade);font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:2px}
+
+/* ---------- tests ---------- */
+.tests{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.test{background:var(--surface);padding:15px 20px;display:grid;grid-template-columns:64px 1fr;gap:18px;align-items:baseline}
+.test .tn{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--copper)}
+.test .tt{font-size:14.5px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.test .tm{font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* ---------- modules ---------- */
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
+.mod{border:1px solid var(--rule);border-radius:4px;background:var(--surface);padding:13px 15px;display:flex;flex-direction:column;gap:5px}
+.mod .mid{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--copper);letter-spacing:.08em}
+.mod .mt{font-size:14px;font-weight:500;color:var(--ink);line-height:1.35}
+.mod .mc{font-size:12px;color:var(--faint);font-family:"IBM Plex Mono",monospace}
+
+/* ---------- close ---------- */
+.closing{margin-top:72px;padding:30px 0 0;border-top:1px solid var(--rule-strong);max-width:68ch;display:flex;flex-direction:column;gap:14px}
+.closing p{color:var(--ink-2)}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;color:var(--ink-2);max-width:66ch}
+li::marker{color:var(--copper)}
+</style>
+
+<div class="wrap">
+<header class="masthead">
+  <div class="mast-top">
+    <span class="org">COOMIDEC</span>
+    <span class="mast-meta">Dossier de conception · v1 · 9 septembre 2026</span>
+  </div>
+  <h1>Gestion des opérations de site</h1>
+  <p class="lede">Remplacement du classeur <em>Système Simplifié Gestion Site</em> par une application tablette <em>offline-first</em>. Le classeur a été décodé formule par formule : voici l'architecture, le modèle de données, les écrans, le moteur de calcul — et les vingt points métier à trancher avant d'écrire la première ligne de code.</p>
+  <dl class="mast-strip">
+    <div><dt>Source analysée</dt><dd>5 feuilles, 220 lignes</dd></div>
+    <div><dt>Règle de calcul</dt><dd>QTY × coût/unité × % coût</dd></div>
+    <div><dt>Tables proposées</dt><dd>12 + outbox locale</dd></div>
+    <div><dt>Écrans</dt><dd>9</dd></div>
+    <div><dt>À valider</dt><dd style="color:var(--rust)">4 questions bloquantes</dd></div>
+  </dl>
+</header>
+
+<div class="layout">
+  <aside class="rail">
+    <div>
+      <div class="rail-title">Sommaire</div>
+      <nav>
+        <a href="#source"><span>0</span><span>Le classeur actuel</span></a>
+        <a href="#archi"><span>A</span><span>Architecture</span></a>
+        <a href="#data"><span>B</span><span>Modèle de données</span></a>
+        <a href="#ecrans"><span>C</span><span>Écrans</span></a>
+        <a href="#sync"><span>D</span><span>Offline / online</span></a>
+        <a href="#calcul"><span>E</span><span>Moteur de calcul</span></a>
+        <a href="#questions"><span>F</span><span>Questions métier</span></a>
+        <a href="#livraison"><span>›</span><span>Livraison</span></a>
+      </nav>
+    </div>
+    <div class="rail-note">
+      <b>Avant M0</b>
+      Q1, Q4, Q5 et Q8 doivent être tranchées : elles conditionnent le moteur de calcul et le modèle de données.
+    </div>
+  </aside>
+
+  <main>
+
+<!-- ============ 0 ============ -->
+<section id="source">
+  <div class="sec-head">
+    <div class="sec-letter">0</div>
+    <div>
+      <h2>Ce que fait le classeur aujourd'hui</h2>
+      <p class="sub">Point de départ obligatoire : l'application doit reproduire un comportement connu avant de le corriger.</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>La feuille <code>SAISIE JOURNALIERE</code> contient deux formules qui portent toute la logique métier. En <code>F9</code>, un <code>LOOKUP</code> matriciel résout le coût unitaire ; en <code>G9</code>, le même <code>LOOKUP</code> récupère un second facteur et produit le montant.</p>
+  </div>
+
+  <div class="wide" style="margin-top:20px">
+<pre><i>SAISIE JOURNALIERE!G9</i>
+=IF(OR(C9="",D9="",E9=""),"",
+   IFERROR(<b>D9 * F9 *</b> LOOKUP(2, 1/((PARAMETRES!$D$4:$D$53 = C9)
+                            * (E9 &gt;= PARAMETRES!$E$4:$E$53)
+                            * (E9 &lt;= PARAMETRES!$F$4:$F$53)),
+                           <b>PARAMETRES!$H$4:$H$53</b>), ""))
+
+<i>traduction métier</i>
+   coutUnitaire = <u>barème(matière, teneur)</u>.COUT_UNITE
+   pctCout      = <u>barème(matière, teneur)</u>.PCT_COUT
+   <b>montant      = QTY × coutUnitaire × pctCout</b></pre>
+  </div>
+
+  <div class="prose" style="margin-top:22px">
+    <p>Trois constats structurants sortent de cette lecture.</p>
+  </div>
+
+  <div class="tablebox" style="margin-top:14px">
+    <table>
+      <thead><tr><th>Constat</th><th>Conséquence</th><th>Traitement dans l'application</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Seule la méthode « barème par tranches » existe.</strong> La méthode « prix par 1 % » n'est nulle part dans le fichier.</td>
+          <td>Ce n'est pas une reprise, c'est une nouveauté à spécifier.</td>
+          <td>Deux méthodes au choix par matière première <span class="pill wait">Q17</span></td>
+        </tr>
+        <tr>
+          <td><strong>Un troisième facteur <code>% COÛT</code></strong> multiplie le montant, sans définition écrite.</td>
+          <td>Part coopérative ? rendement ? décote qualité ? Le rapport ne peut pas être libellé sans le savoir.</td>
+          <td>Conservé tel quel, définition à obtenir <span class="pill err">Q4</span></td>
+        </tr>
+        <tr>
+          <td><strong>Modifier un prix recalcule tout l'historique</strong>, puisque le barème n'est pas horodaté.</td>
+          <td>C'est exactement ce que le TEST 3 interdit.</td>
+          <td>Barèmes historisés + snapshot figé par opération</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn" style="margin-top:22px">
+    <span class="eyebrow">Le classeur fourni est vide</span>
+    <p>Site, territoire, responsable, barème, creuseurs, opérations : toutes les zones de saisie sont vierges. <strong>Il n'y a donc aucune donnée réelle COOMIDEC à reprendre.</strong> Le jeu de données de démonstration sera entièrement fictif, rattaché à un site nommé <code>SITE-DEMO</code>, marqué en base et signalé par un bandeau permanent dans l'interface.</p>
+  </div>
+</section>
+
+<!-- ============ A ============ -->
+<section id="archi">
+  <div class="sec-head">
+    <div class="sec-letter">A</div>
+    <div>
+      <h2>Architecture</h2>
+      <p class="sub">Un principe unique commande tout le reste : le domaine métier est isomorphe.</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>Le moteur de calcul, les règles de validation et les invariants de statut vivent dans un paquet TypeScript unique, exécuté <strong>à l'identique</strong> sur la tablette hors ligne et sur le serveur à la synchronisation. Le serveur ne fait jamais confiance au montant envoyé par la tablette : il rejoue le calcul à partir du snapshot tarifaire transporté par l'opération, et compare.</p>
+    <p>C'est ce choix qui rend les TEST 3 et TEST 4 <em>démontrables</em> au lieu d'être espérés.</p>
+  </div>
+
+  <div class="wide" style="margin-top:20px">
+<pre>coomidec/
+├── apps/
+│   ├── web/        <i>PWA React 18 + TypeScript + Vite (Workbox)</i>
+│   │   ├── src/db/     <i>Dexie / IndexedDB — schéma et migrations locales</i>
+│   │   ├── src/sync/   <i>outbox, temporisation, réconciliation</i>
+│   │   └── src/pdf/    <i>rapport A4 généré hors ligne (pdf-lib)</i>
+│   └── api/        <i>Node 20 + Fastify + Kysely</i>
+├── packages/
+│   └── core/       <b>★ PARTAGÉ CLIENT + SERVEUR</b>
+│       ├── calcul/     <i>moteur, évaluateur de formules</i>
+│       ├── schema/     <i>types + validation Zod</i>
+│       └── regles/     <i>transitions de statut, invariants de clôture</i>
+├── infra/          <i>docker-compose, sauvegarde / restauration</i>
+└── seed/           <i>jeu de données fictif</i></pre>
+  </div>
+
+  <div class="tablebox" style="margin-top:22px">
+    <table>
+      <thead><tr><th style="width:1%">#</th><th>Couche</th><th>Technologie</th><th>Responsabilité</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>Présentation</td><td><code>React 18 · TypeScript</code></td><td>Écrans tactiles, gros boutons, retour visuel</td></tr>
+        <tr><td class="num">2</td><td>Domaine</td><td><code>@coomidec/core</code></td><td>Calcul, validation, statuts — <strong>zéro I/O</strong></td></tr>
+        <tr><td class="num">3</td><td>Persistance locale</td><td><code>Dexie · IndexedDB</code></td><td>Miroir des tables + outbox + méta</td></tr>
+        <tr><td class="num">4</td><td>Synchronisation</td><td><code>Background Sync API</code></td><td>File d'attente, reprise, anti-doublon</td></tr>
+        <tr><td class="num">5</td><td>Transport</td><td><code>REST · Idempotency-Key</code></td><td>Lots de 50, gzip</td></tr>
+        <tr><td class="num">6</td><td>API</td><td><code>Fastify · Zod</code></td><td>Auth, upsert idempotent, audit, agrégats</td></tr>
+        <tr><td class="num">7</td><td>Données</td><td><code>PostgreSQL 16</code></td><td>Source de vérité, historisation tarifaire</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:26px">
+    <h3>Pourquoi pas un moteur de réplication tout fait</h3>
+    <p>PouchDB, Firebase et consorts résolvent la synchronisation à votre place — mais résolvent aussi les conflits à votre place, souvent en « dernier écrivain gagne ». Sur des données financières auditées, c'est inacceptable. La file de synchronisation doit rester <strong>lisible, inspectable et réparable à la main</strong> par un administrateur. Un moteur opaque est un risque, pas un gain.</p>
+
+    <h3>Ouvrir une session sans réseau</h3>
+    <p>Une tablette peut passer plusieurs jours sans connexion. Exiger un aller-retour serveur pour se connecter rendrait l'application inutilisable précisément là où elle doit servir.</p>
+  </div>
+
+  <div class="wide" style="margin-top:14px">
+<pre><b>1.</b> Première connexion — <u>obligatoirement en ligne</u>
+   appareil enregistré · rattaché à un site · jeton de rafraîchissement 90 jours
+
+<b>2.</b> Mise en cache locale
+   profil utilisateur + <u>hachage Argon2id du code PIN</u>
+
+<b>3.</b> Ouvertures suivantes — <u>hors ligne</u>
+   déverrouillage par PIN, vérifié localement contre le hachage
+
+<b>4.</b> Chaque opération porte created_by + device_id
+   le serveur revalide le couple et <u>refuse un appareil révoqué</u></pre>
+  </div>
+</section>
+
+<!-- ============ B ============ -->
+<section id="data">
+  <div class="sec-head">
+    <div class="sec-letter">B</div>
+    <div>
+      <h2>Modèle de données</h2>
+      <p class="sub">Douze tables PostgreSQL, une outbox locale. Rien n'est jamais supprimé physiquement.</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>Toutes les tables métier portent : <code>id UUID</code>, <code>created_at</code>, <code>updated_at</code>, <code>created_by</code>, <code>device_id</code>, <code>sync_status</code>, <code>version</code> (concurrence optimiste) et <code>deleted_at</code> (suppression logique).</p>
+    <p>Les UUID sont générés <strong>sur l'appareil</strong>. L'identité d'une opération ne change donc jamais entre la tablette et le serveur — c'est la base de l'anti-doublon.</p>
+  </div>
+
+  <div class="tablebox" style="margin-top:20px">
+    <table>
+      <thead><tr><th>Table</th><th>Rôle</th><th>Particularité</th></tr></thead>
+      <tbody>
+        <tr><td><code>sites</code></td><td>Sites / ZEA</td><td>code, territoire, province</td></tr>
+        <tr><td><code>unites</code></td><td>Unités de mesure</td><td>décimales, facteur de conversion en kg</td></tr>
+        <tr><td><code>matieres_premieres</code></td><td>Référentiel matières</td><td>méthode de calcul + formule configurable</td></tr>
+        <tr><td><code>baremes_teneur</code></td><td>Tranches de teneur</td><td><strong>historisée, en ajout seul</strong></td></tr>
+        <tr><td><code>operations</code></td><td>Saisies de terrain</td><td>porte le <strong>snapshot de calcul</strong></td></tr>
+        <tr><td><code>creuseurs</code></td><td>Registre des creuseurs</td><td>recherche trigramme, alerte d'expiration</td></tr>
+        <tr><td><code>clotures_journalieres</code></td><td>Clôtures</td><td>totaux figés, unique par site et par jour</td></tr>
+        <tr><td><code>utilisateurs</code></td><td>Comptes et rôles</td><td>Argon2id · mot de passe + PIN hors ligne</td></tr>
+        <tr><td><code>devices</code></td><td>Tablettes enregistrées</td><td>révocation, dernière synchronisation</td></tr>
+        <tr><td><code>parametres</code></td><td>Configuration</td><td>portée globale ou par site</td></tr>
+        <tr><td><code>audit_logs</code></td><td>Journal d'audit</td><td><strong>en ajout seul</strong>, <code>UPDATE</code>/<code>DELETE</code> révoqués</td></tr>
+        <tr><td><code>idempotency_keys</code></td><td>Anti-rejeu serveur</td><td>réponse mémorisée par clé</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Le barème n'est jamais modifié en place</h3>
+    <p>C'est le mécanisme central du TEST 3. Changer un prix ferme la ligne courante et en ouvre une nouvelle : l'ancienne valeur reste consultable, vérifiable et opposable.</p>
+  </div>
+
+  <div class="wide" style="margin-top:14px">
+<pre><i>-- changer un prix</i>
+UPDATE baremes_teneur SET <b>valide_au = now()</b> WHERE id = $1 AND valide_au IS NULL;
+INSERT INTO baremes_teneur (...) VALUES (..., <b>valide_du = now(), valide_au = NULL</b>);
+
+<i>-- aucun chevauchement possible parmi les lignes actives</i>
+ALTER TABLE baremes_teneur ADD CONSTRAINT baremes_sans_chevauchement
+  EXCLUDE USING gist (
+    matiere_id WITH =,
+    <b>numrange(teneur_min, teneur_max, '[)')</b> WITH &amp;&amp;,
+    tstzrange(valide_du, valide_au, '[)')       WITH &amp;&amp;
+  );</pre>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Le snapshot de calcul</h3>
+    <p>Chaque opération embarque, dans une colonne <code>jsonb</code>, tout ce qu'il faut pour réexpliquer son montant dix ans plus tard sans consulter aucune autre table.</p>
+  </div>
+
+  <div class="wide" style="margin-top:14px">
+<pre><i>operations.calcul</i>
+{
+  "moteurVersion": "1.0.0",
+  "methode":       "BAREME_TRANCHES",
+  "formule":       "QTY * COUT_UNITAIRE * PCT_COUT",
+  "baremeId":      "3f9a…",  "baremeVersion": 2,
+  "entrees":  { "qty": 12.5, "teneur": 3.2, "unite": "T" },
+  <b>"tarif":    { "coutUnitaire": 120.0, "pctCout": 0.85, "devise": "USD" },</b>
+  "montantBrut":    1275.0,
+  "montantArrondi": 1275.00,
+  "calculeA": "2026-09-09T08:14:03+02:00"
+}</pre>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Un numéro qui ne bouge jamais</h3>
+    <p>Dans le classeur, le numéro d'une opération est son rang de ligne : insérer une ligne renumérote tout ce qui suit. Hors ligne, un numéro attribué par le serveur changerait à la synchronisation — et les rapports papier déjà signés deviendraient faux. Le numéro est donc attribué <strong>sur l'appareil, dès la création</strong>.</p>
+  </div>
+
+  <div class="wide" style="margin-top:14px">
+<pre>COOMIDEC/{SITE}/{YYYYMMDD}/{DEVICE4}-{SEQ}
+
+<b>COOMIDEC/KOL/20260909/A7F3-014</b>
+              <i>│         │      │     └─ compteur local du jour</i>
+              <i>│         │      └─────── 4 caractères stables de l'appareil</i>
+              <i>│         └────────────── journée métier (heure locale du site)</i>
+              <i>└──────────────────────── code du site</i></pre>
+  </div>
+</section>
+
+<!-- ============ C ============ -->
+<section id="ecrans">
+  <div class="sec-head">
+    <div class="sec-letter">C</div>
+    <div>
+      <h2>Écrans</h2>
+      <p class="sub">Tablette 10 pouces, tenue à une main, en plein soleil, les doigts poussiéreux.</p>
+    </div>
+  </div>
+
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Contrainte</th><th>Valeur retenue</th></tr></thead>
+      <tbody>
+        <tr><td>Cible tactile minimale</td><td class="num">64 × 64 px · boutons principaux 96 px de haut</td></tr>
+        <tr><td>Taille de texte minimale</td><td class="num">16 px · valeurs numériques 24 px</td></tr>
+        <tr><td>Contraste</td><td class="num">≥ 7:1</td></tr>
+        <tr><td>Clics pour enregistrer une opération</td><td class="num">4 au maximum</td></tr>
+        <tr><td>Champs à saisir par défaut</td><td class="num">3 — matière, QTY, teneur</td></tr>
+        <tr><td>Confirmation d'enregistrement</td><td class="num">bandeau plein écran 1,5 s + vibration</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:22px">
+    <p>Pas de clavier alphabétique pour saisir un nombre : pavé numérique intégré, gros chiffres. Pas de liste déroulante pour la matière première : de grandes tuiles.</p>
+  </div>
+
+  <div class="screens" style="margin-top:22px">
+    <div class="screen"><span class="n">01</span><h4>Accueil</h4><p>Bandeau site / date / responsable / état réseau / compteur d'opérations en attente, puis huit grandes tuiles à compteur.</p></div>
+    <div class="screen"><span class="n">02</span><h4>Nouvelle saisie</h4><p>Un seul écran, pas d'assistant. Bandeau de calcul en direct sous les champs. <code>ENREGISTRER</code> n'attend jamais le réseau.</p></div>
+    <div class="screen"><span class="n">03</span><h4>Opérations du jour</h4><p>Recherche, filtres, totaux figés en bas. Modification avant clôture, annulation à motif obligatoire, jamais de suppression.</p></div>
+    <div class="screen"><span class="n">04</span><h4>Clôture journalière</h4><p>Récapitulatif complet, blocages explicites, confirmation par saisie du nom du responsable — pas un simple « OK ».</p></div>
+    <div class="screen"><span class="n">05</span><h4>Rapport journalier</h4><p>A4 portrait, en-tête COOMIDEC, PDF généré <strong>localement</strong> — donc disponible hors ligne, quand on en a besoin.</p></div>
+    <div class="screen"><span class="n">06</span><h4>Tableau de bord</h4><p>Indicateurs du jour, filtres jour / semaine / mois / période, quatre graphiques. Hors ligne, la source locale est signalée.</p></div>
+    <div class="screen"><span class="n">07</span><h4>Creuseurs</h4><p>Recherche instantanée par nom ou n° de carte. Pastille orange à 30 jours de l'expiration, rouge après échéance.</p></div>
+    <div class="screen"><span class="n">08</span><h4>Paramètres</h4><p>L'écran <strong>Barèmes</strong> est le plus sensible : règle graphique de 0 à 100 %, détection des trous et chevauchements, simulateur intégré.</p></div>
+    <div class="screen"><span class="n">09</span><h4>Synchronisation</h4><p>En attente / en erreur / synchronisées. Tentatives, message lisible, prochain essai, export de la file de secours.</p></div>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Codes d'état</h3>
+    <p>Le mot accompagne toujours la couleur — plein soleil et daltonisme sont deux raisons indépendantes de ne jamais coder une information par la seule teinte.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+    <span class="pill ok">SYNCHRONISÉ</span>
+    <span class="pill wait">EN ATTENTE DE SYNCHRONISATION</span>
+    <span class="pill err">ERREUR DE SYNCHRONISATION</span>
+    <span class="pill lock">CLÔTURÉE</span>
+    <span class="pill err">ANNULÉE</span>
+    <span class="pill wait">HORS BARÈME</span>
+  </div>
+</section>
+
+<!-- ============ D ============ -->
+<section id="sync">
+  <div class="sec-head">
+    <div class="sec-letter">D</div>
+    <div>
+      <h2>Workflow offline / online</h2>
+      <p class="sub">Aucune écriture métier ne passe par le réseau.</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>L'interface écrit dans IndexedDB, puis rend la main. La synchronisation est un processus d'arrière-plan qui n'a jamais le droit de bloquer, ralentir ou faire échouer une saisie.</p>
+    <p>L'opération et son entrée d'outbox sont écrites <strong>dans la même transaction</strong>. Les deux réussissent ou échouent ensemble : il ne peut pas exister d'opération sans entrée de file, ni l'inverse.</p>
+  </div>
+
+  <div class="wide" style="margin-top:18px">
+<pre>await db.transaction('rw', db.operations, db.outbox, async () =&gt; {
+  await db.operations.add(operation);        <i>// avec son snapshot de calcul</i>
+  await db.outbox.add({ entite: 'operation', entite_id: operation.id,
+                        version: operation.version, statut: 'EN_ATTENTE',
+                        tentatives: 0, prochain_essai_le: Date.now() });
+});
+<i>// ↓ seulement ici</i>
+<b>afficherConfirmation();</b></pre>
+  </div>
+
+  <div class="callout" style="margin-top:18px">
+    <span class="eyebrow">TEST 1</span>
+    <p>Coupure d'alimentation, fermeture forcée de l'application, redémarrage de la tablette : les dix opérations sont là, <strong>et elles sont toujours en file</strong>. C'est cette atomicité qui l'assure — pas la bonne volonté du code appelant.</p>
+  </div>
+
+  <div class="diagram" style="margin-top:26px">
+    <svg viewBox="0 0 700 268" role="img" aria-label="Cycle de vie d'un élément de la file de synchronisation">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--rule-strong)"/>
+        </marker>
+      </defs>
+
+      <text class="d-lbl" x="157" y="24" text-anchor="middle">enregistrer</text>
+      <text class="d-lbl" x="515" y="24" text-anchor="middle">200 OK</text>
+
+      <rect class="d-box" x="8" y="34" width="128" height="42" rx="4"/>
+      <text class="d-t" x="72" y="60" text-anchor="middle">BROUILLON</text>
+
+      <rect class="d-box-wait" x="184" y="34" width="128" height="42" rx="4"/>
+      <text class="d-t d-t-wait" x="248" y="60" text-anchor="middle">EN ATTENTE</text>
+
+      <rect class="d-box" x="360" y="34" width="128" height="42" rx="4"/>
+      <text class="d-t" x="424" y="60" text-anchor="middle">EN COURS</text>
+
+      <rect class="d-box-ok" x="548" y="34" width="140" height="42" rx="4"/>
+      <text class="d-t d-t-ok" x="618" y="60" text-anchor="middle">SYNCHRONISÉ</text>
+
+      <line class="d-line" x1="136" y1="55" x2="178" y2="55" marker-end="url(#ah)"/>
+      <line class="d-line" x1="312" y1="55" x2="354" y2="55" marker-end="url(#ah)"/>
+      <line class="d-line" x1="488" y1="55" x2="542" y2="55" marker-end="url(#ah)"/>
+
+      <path class="d-line" d="M 396 76 C 396 126, 272 126, 272 82" marker-end="url(#ah)"/>
+      <text class="d-lbl" x="334" y="150" text-anchor="middle">erreur réseau · temporisation 1 s → 5 min</text>
+
+      <line class="d-line" x1="460" y1="76" x2="460" y2="190" marker-end="url(#ah)"/>
+      <text class="d-lbl" x="470" y="176" text-anchor="start">7 échecs · 4xx</text>
+
+      <path class="d-line" d="M 494 74 C 560 104, 606 144, 616 190" marker-end="url(#ah)"/>
+      <text class="d-lbl" x="586" y="132" text-anchor="start">version obsolète</text>
+
+      <rect class="d-box-err" x="396" y="196" width="128" height="42" rx="4"/>
+      <text class="d-t d-t-err" x="460" y="222" text-anchor="middle">ERREUR</text>
+
+      <rect class="d-box-err" x="548" y="196" width="140" height="42" rx="4"/>
+      <text class="d-t d-t-err" x="618" y="222" text-anchor="middle">CONFLIT</text>
+
+      <text class="d-lbl" x="460" y="258" text-anchor="middle">intervention manuelle</text>
+      <text class="d-lbl" x="618" y="258" text-anchor="middle">arbitrage superviseur</text>
+    </svg>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Trois protections superposées contre les doublons</h3>
+  </div>
+
+  <div class="tablebox" style="margin-top:14px">
+    <table>
+      <thead><tr><th style="width:1%">#</th><th>Protection</th><th>Effet</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><strong>UUID généré sur l'appareil</strong></td><td>Un renvoi vise la même ligne, pas une nouvelle</td></tr>
+        <tr><td class="num">2</td><td><code>Idempotency-Key: {id}:{version}</code></td><td>Un rejeu exact renvoie la réponse mémorisée, sans réécriture</td></tr>
+        <tr><td class="num">3</td><td><strong>Garde de version en SQL</strong></td><td>Une charge périmée ne peut pas écraser une donnée plus récente</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wide" style="margin-top:18px">
+<pre>INSERT INTO operations (...) VALUES (...)
+ON CONFLICT (id) DO UPDATE SET ...
+ WHERE <b>operations.version &lt; EXCLUDED.version</b>      <i>-- anti-régression</i>
+   AND <b>operations.verrouillee = false</b>;             <i>-- anti-écrasement d'une clôture</i></pre>
+  </div>
+
+  <div class="callout" style="margin-top:18px">
+    <span class="eyebrow">TEST 2</span>
+    <p>Dix opérations envoyées deux fois donnent dix lignes. L'entrée d'outbox n'est supprimée qu'après réception du <code>200</code> <strong>et</strong> de l'accusé serveur portant l'identifiant correspondant.</p>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Conflits — jamais « dernier écrivain gagne »</h3>
+  </div>
+
+  <div class="tablebox" style="margin-top:14px">
+    <table>
+      <thead><tr><th>Cas</th><th>Traitement</th></tr></thead>
+      <tbody>
+        <tr><td>Même opération modifiée sur deux appareils</td><td>Version serveur conservée, version locale rangée en <span class="pill err">CONFLIT</span>, arbitrage par un superviseur, les deux valeurs restent tracées</td></tr>
+        <tr><td>Modification alors que la journée a été clôturée entre-temps</td><td>Rejet <code>409</code> → statut <code>CORRECTION_REQUISE</code>, procédure contrôlée obligatoire</td></tr>
+        <tr><td>Deux clôtures pour le même site et le même jour</td><td>La première arrivée gagne (contrainte d'unicité), la seconde est signalée</td></tr>
+        <tr><td>Appareil révoqué</td><td>Rejet <code>403</code>, données conservées localement, export manuel possible</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Horloges</h3>
+    <p>Une tablette hors ligne peut avoir une horloge fausse. Chaque enregistrement porte donc l'heure déclarée par l'appareil, l'heure posée par le serveur à la réception, et l'écart calculé. Au-delà de cinq minutes : avertissement à l'écran et entrée d'audit.</p>
+    <p>Référence : <code>Africa/Lubumbashi</code> (UTC+2, sans changement d'heure). Les dates métier sont des <code>DATE</code> en heure locale du site, jamais des UTC convertis — <strong>une opération du 9 septembre à 23 h doit appartenir à la journée du 9</strong>.</p>
+  </div>
+</section>
+
+<!-- ============ E ============ -->
+<section id="calcul">
+  <div class="sec-head">
+    <div class="sec-letter">E</div>
+    <div>
+      <h2>Moteur de calcul</h2>
+      <p class="sub">Une seule fonction publique, pure, déterministe. Aucun écran n'a le droit de calculer un montant.</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p><code>calculerOperation(entree)</code> vit dans <code>packages/core/calcul/</code> : pas d'I/O, pas d'accès base, pas même de <code>Date.now()</code>. Elle est appelée par le formulaire de saisie (aperçu en direct), par le service d'enregistrement (production du snapshot), par l'API à la synchronisation (vérification), et par les tests.</p>
+  </div>
+
+  <div class="tablebox" style="margin-top:20px">
+    <table>
+      <thead><tr><th>Méthode</th><th>Formule par défaut</th><th>Origine</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>B — Barème par tranches</strong></td>
+          <td><code>QTY * COUT_UNITAIRE * PCT_COUT</code></td>
+          <td>Transposition exacte du classeur</td>
+        </tr>
+        <tr>
+          <td><strong>A — Prix par 1 %</strong></td>
+          <td><code>QTY * TENEUR * PRIX_PAR_POURCENT * PCT_COUT</code></td>
+          <td><span class="pill wait">Nouveauté — Q17</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:26px">
+    <h3>Deux corrections délibérées du comportement Excel</h3>
+  </div>
+
+  <div class="tablebox" style="margin-top:14px">
+    <table>
+      <thead><tr><th>Classeur</th><th>Application</th><th>Pourquoi</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Bornes inclusives des deux côtés : <code>≥ min</code> <strong>et</strong> <code>≤ max</code></td>
+          <td>Intervalles semi-ouverts <code>[min, max)</code></td>
+          <td>Les tranches <code>0–2</code> et <code>2–5</code> ne se disputent plus la valeur <code>2</code></td>
+        </tr>
+        <tr>
+          <td><code>LOOKUP(2, 1/…)</code> retient <strong>la dernière</strong> ligne correspondante, en silence</td>
+          <td>Chevauchement <strong>interdit</strong> à la configuration</td>
+          <td>Un barème ambigu est un défaut de paramétrage, pas un cas à arbitrer à l'exécution</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:26px">
+    <h3>Formules configurables, sans <code>eval</code></h3>
+    <p>Le champ <code>formule</code> d'une matière contient une expression textuelle, analysée en arbre puis évaluée par un évaluateur restreint écrit pour ce projet. Pas de <code>eval</code>, pas de <code>new Function</code>, aucune exécution de code arbitraire depuis la base.</p>
+  </div>
+
+  <div class="wide" style="margin-top:14px">
+<pre><i>variables</i>   QTY · TENEUR · COUT_UNITAIRE · PCT_COUT · PRIX_PAR_POURCENT · VALEUR_TENEUR
+<i>opérateurs</i>  +  -  *  /  ( )
+<i>fonctions</i>   min(a,b) · max(a,b) · arrondi(x,n) · plafond(x) · plancher(x)</pre>
+  </div>
+
+  <div class="prose" style="margin-top:16px">
+    <p>Toute formule est validée à l'enregistrement — syntaxe, variables connues, absence de division par zéro sur un jeu d'essai — et passée au simulateur avant activation. <strong>Aucun changement de prix ou de formule ne demandera jamais de modifier le code.</strong></p>
+  </div>
+
+  <div class="prose" style="margin-top:26px">
+    <h3>Un calcul, de bout en bout</h3>
+  </div>
+
+  <div class="trace" style="margin-top:14px">
+    <div class="trace-head">
+      <span class="eyebrow">Opération COOMIDEC/KOL/20260909/A7F3-014</span>
+      <span class="eyebrow">9 sept. 2026 · 08:14</span>
+    </div>
+    <div class="trace-body">
+<pre><i>Matière</i>          Cuivre · méthode BAREME_TRANCHES · USD
+<i>Barème actif</i>     <b>[3,00 % – 4,00 %)</b>   coût/unité <b>120,0000</b>   % coût <b>85 %</b>
+<i>Saisie agent</i>     QTY <b>12,500 T</b>        teneur <b>3,200 %</b>
+────────────────────────────────────────────────────────────────
+<i>tranche résolue</i>  [3,00 – 4,00)        <u>✓ 3,200 appartient à la tranche</u>
+<i>formule</i>          QTY × COUT_UNITAIRE × PCT_COUT
+<i>montant brut</i>     12,5 × 120,0000 × 0,85  =  1 275,0000
+<i>arrondi</i>          commercial half-up, 2 décimales</pre>
+    </div>
+    <div class="trace-total">
+      <span class="lbl">Montant enregistré</span>
+      <span class="amt">1 275,00<small>USD</small></span>
+    </div>
+  </div>
+
+  <div class="prose" style="margin-top:30px">
+    <h3>Le lendemain, le tarif change</h3>
+    <p>Le coût unitaire du cuivre passe de 120 à 130 USD dans Paramètres. La ligne de barème est fermée, une nouvelle est ouverte, une entrée <code>CHANGEMENT_TARIF</code> est écrite dans le journal d'audit avec ancienne valeur, nouvelle valeur, auteur et motif.</p>
+  </div>
+
+  <div class="frozen">
+    <div class="frozen-card same">
+      <span class="eyebrow">Opération du 9 septembre</span>
+      <div class="v">1 275,00 USD</div>
+      <p class="n">Inchangée. Son snapshot porte <code>120,0000</code> et <code>0,85</code> — la table des barèmes n'est jamais relue.</p>
+    </div>
+    <div class="frozen-card">
+      <span class="eyebrow">Opération du 10 septembre</span>
+      <div class="v">1 381,25 USD</div>
+      <p class="n">Nouveau tarif appliqué : <code>12,5 × 130,0000 × 0,85</code>.</p>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:22px">
+    <span class="eyebrow">TEST 3 — trois barrières indépendantes</span>
+    <p><strong>1.</strong> Le snapshot : l'opération porte son tarif, l'affichage lit le snapshot. <strong>2.</strong> L'historisation : un tarif n'est jamais modifié en place, l'ancienne valeur reste vérifiable. <strong>3.</strong> L'absence de recalcul : aucun chemin de code ne recalcule une opération existante — une correction contrôlée crée une nouvelle version tracée, elle ne réécrit pas l'ancienne.</p>
+  </div>
+
+  <div class="prose" style="margin-top:28px">
+    <h3>Précision décimale</h3>
+    <p><code>decimal.js-light</code> sur toute la chaîne, jamais de flottant IEEE-754 pour de l'argent : <code>12.5 * 120 * 0.85</code> en virgule flottante ne donne pas exactement <code>1275</code>.</p>
+  </div>
+
+  <div class="tablebox" style="margin-top:14px">
+    <table>
+      <thead><tr><th>Grandeur</th><th>Stockage</th><th>Arrondi</th></tr></thead>
+      <tbody>
+        <tr><td>QTY</td><td><code>NUMERIC(18,3)</code></td><td class="num">3 décimales</td></tr>
+        <tr><td>Teneur</td><td><code>NUMERIC(6,3)</code></td><td class="num">3 décimales</td></tr>
+        <tr><td>Coût unitaire · prix par 1 %</td><td><code>NUMERIC(18,4)</code></td><td class="num">4 décimales</td></tr>
+        <tr><td>% coût</td><td><code>NUMERIC(9,6)</code></td><td class="num">stocké 0,85 · affiché 85 %</td></tr>
+        <tr><td>Montant brut</td><td>snapshot</td><td class="num">non arrondi</td></tr>
+        <tr><td>Montant final</td><td><code>NUMERIC(18,2)</code></td><td class="num">half-up, 2 décimales</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:16px">
+    <p>Le montant brut <strong>et</strong> le montant arrondi figurent tous deux dans le snapshot : un total de journée se calcule sur les montants arrondis — ce que voit l'agent — et l'écart d'arrondi reste explicable.</p>
+  </div>
+</section>
+
+<!-- ============ F ============ -->
+<section id="questions">
+  <div class="sec-head">
+    <div class="sec-letter">F</div>
+    <div>
+      <h2>Risques et questions métier</h2>
+      <p class="sub">Vingt points relevés. Quatre bloquent le démarrage du développement.</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p><strong>Bloquant</strong> signifie ici : le module concerné ne peut pas être écrit sans la réponse, et le construire sur une hypothèse coûterait une réécriture.</p>
+  </div>
+
+  <div class="qgroup" style="margin-top:22px">
+    <div class="q block">
+      <span class="qid">Q4</span>
+      <div>
+        <h4>Que signifie exactement <code>% COÛT</code> ?</h4>
+        <p>La colonne <code>PARAMETRES!H</code> multiplie le montant, mais rien dans le fichier n'en donne la définition. Part revenant à la coopérative sur la valeur du minerai ? Rendement ou taux de récupération technique ? Décote qualité appliquée au prix de référence ? Les trois lectures ont des conséquences comptables très différentes, et l'intitulé du rapport journalier ne peut pas être écrit sans trancher.</p>
+      </div>
+    </div>
+
+    <div class="q block">
+      <span class="qid">Q5</span>
+      <div>
+        <h4>« Coût » ou « valeur » ?</h4>
+        <p>Le fichier dit <code>COÛT CALCULÉ</code>. S'agit-il de ce que <strong>COOMIDEC paie</strong> au creuseur pour le minerai, ou de la <strong>valeur estimée</strong> de la production ? Le même nombre ne se lit pas de la même façon dans un rapport de production et dans un journal de trésorerie.</p>
+      </div>
+    </div>
+
+    <div class="q block">
+      <span class="qid">Q1</span>
+      <div>
+        <h4>Teneur moyenne : arithmétique ou pondérée par la QTY ?</h4>
+        <p>Le classeur calcule <code>SUMIF(teneur)/COUNTIF</code>, une moyenne arithmétique simple. Pour du minerai, c'est statistiquement faux : une opération de 0,5 t à 8 % y pèse autant qu'une opération de 40 t à 2 %.</p>
+        <div class="reco"><b>Recommandation</b>La teneur moyenne du site devient la moyenne pondérée <code>Σ(qty × teneur) / Σ qty</code>, et la moyenne arithmétique reste affichée à côté, explicitement libellée, pour la continuité avec le classeur.</div>
+      </div>
+    </div>
+
+    <div class="q block">
+      <span class="qid">Q8</span>
+      <div>
+        <h4>Une opération est-elle rattachée à un creuseur ?</h4>
+        <p>Le classeur n'établit <strong>aucun lien</strong> entre <code>BASE CREUSEURS</code> et <code>SAISIE JOURNALIERE</code>. Une opération correspond-elle à un creuseur — donc base d'une rémunération individuelle — à une équipe, ou à un lot / camion / sac sans attribution nominative ? La réponse détermine si <code>creuseur_id</code> est obligatoire, facultatif ou inutile, et si l'application devient un outil de paie, ce qui élargirait son périmètre.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="prose" style="margin-top:34px"><h3>Importantes — recommandation appliquée par défaut, à confirmer</h3></div>
+
+  <div class="qgroup" style="margin-top:14px">
+    <div class="q"><span class="qid">Q2</span><div><h4>Tranches qui se chevauchent</h4><p>Dans le classeur, la dernière ligne correspondante gagne, sans avertissement.</p><div class="reco"><b>Recommandation</b>Intervalles <code>[min, max)</code>, chevauchement interdit à la configuration, contrôle visuel dans l'écran Barèmes.</div></div></div>
+    <div class="q"><span class="qid">Q3</span><div><h4>Teneur hors de toute tranche</h4><p>Le classeur enregistre la ligne sans montant et sans alerte.</p><div class="reco"><b>Recommandation</b>Avertissement <span class="pill wait">HORS BARÈME</span>, enregistrement autorisé au statut <code>À VALIDER</code>, clôture bloquée tant qu'il en reste. Faut-il au contraire interdire l'enregistrement ?</div></div></div>
+    <div class="q"><span class="qid">Q6</span><div><h4>Unités et conversions</h4><p>Le classeur n'a pas de colonne d'unité. Tonnes, kilogrammes, sacs, colis ? Faut-il gérer une conversion sacs → kg, et ce facteur est-il constant ?</p></div></div>
+    <div class="q"><span class="qid">Q7</span><div><h4>Multi-site</h4><p>Un fichier = un site ; l'application est multi-site. Un agent voit-il uniquement son site ? Qui consolide ? Faut-il un total groupe au tableau de bord ?</p></div></div>
+    <div class="q"><span class="qid">Q9</span><div><h4>Devise</h4><p>USD, CDF, ou les deux ?</p><div class="reco"><b>Recommandation</b>En cas de bi-devise, taux de change figé dans le snapshot de chaque opération — sans quoi les totaux historiques deviennent irreproductibles.</div></div></div>
+    <div class="q"><span class="qid">Q10</span><div><h4>Clôturer avec des opérations non synchronisées</h4><div class="reco"><b>Recommandation</b>Autoriser, marquer le rapport <code>PROVISOIRE</code> en filigrane et enregistrer le nombre d'opérations concernées dans la clôture. Faut-il au contraire bloquer ?</div></div></div>
+    <div class="q"><span class="qid">Q11</span><div><h4>Qui autorise une réouverture ?</h4><p>Rôle administrateur seul ? Double validation par deux personnes ? Fenêtre maximale, par exemple sept jours après la clôture ?</p></div></div>
+    <div class="q"><span class="qid">Q13</span><div><h4>Carte artisanale expirée</h4><p>Une opération peut-elle être attribuée à un creuseur dont la carte est périmée ?</p><div class="reco"><b>Recommandation</b>Avertissement visible, enregistrement autorisé, mention au rapport — sauf obligation réglementaire imposant un blocage strict.</div></div></div>
+    <div class="q"><span class="qid">Q17</span><div><h4>Formule exacte de la méthode « prix par 1 % »</h4><p>Votre exemple s'arrête à <code>valeurTeneur = 3 × 120 = 360 USD</code>. La formule finale est-elle <code>QTY × valeurTeneur</code>, soit <code>12,5 × 360 = 4 500 USD</code> ? Et le <code>% coût</code> s'applique-t-il aussi dans cette méthode ?</p></div></div>
+  </div>
+
+  <div class="prose" style="margin-top:34px"><h3>À arbitrer plus tard</h3></div>
+
+  <div class="tablebox" style="margin-top:14px">
+    <table>
+      <thead><tr><th style="width:1%">N°</th><th>Point</th><th>Enjeu</th></tr></thead>
+      <tbody>
+        <tr><td><code>Q12</code></td><td>Signature</td><td>De l'agent, du creuseur, ou des deux ? Valeur probante en cas de litige — ce qui imposerait horodatage renforcé et empreinte cryptographique</td></tr>
+        <tr><td><code>Q14</code></td><td>Bornes de la journée</td><td>Minuit à minuit, ou postes de travail (6 h → 6 h) ? Une saisie à 23 h 45 appartient à quelle journée ?</td></tr>
+        <tr><td><code>Q15</code></td><td>Perte d'un appareil</td><td>Une tablette perdue avant synchronisation emporte ses données. Synchronisation quotidienne obligatoire, alerte à 24 h, chiffrement local au repos</td></tr>
+        <tr><td><code>Q16</code></td><td>Données personnelles</td><td>Nom, téléphone, n° de carte des creuseurs. Durée de conservation, qui consulte, qui exporte</td></tr>
+        <tr><td><code>Q18</code></td><td>Volumétrie</td><td>Opérations par jour et par site, nombre de sites, de tablettes, d'utilisateurs simultanés</td></tr>
+        <tr><td><code>Q19</code></td><td>Connectivité réelle</td><td>2G, 3G, satellite, ou synchronisation une seule fois par jour au retour au bureau ? Conditionne la taille des lots</td></tr>
+        <tr><td><code>Q20</code></td><td>Reprise d'historique</td><td>Le classeur fourni est vide. Existe-t-il d'autres fichiers contenant des opérations déjà saisies à importer ?</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ livraison ============ -->
+<section id="livraison">
+  <div class="sec-head">
+    <div class="sec-letter">›</div>
+    <div>
+      <h2>Livraison par modules</h2>
+      <p class="sub">Chaque module est livrable, testé et démontrable seul. L'ordre est contraint par les dépendances.</p>
+    </div>
+  </div>
+
+  <div class="mods">
+    <div class="mod"><span class="mid">M0</span><span class="mt">Socle</span><span class="mc">monorepo · CI · schéma · auth</span></div>
+    <div class="mod"><span class="mid">M1</span><span class="mt">Paramètres et barèmes</span><span class="mc">simulateur intégré</span></div>
+    <div class="mod"><span class="mid">M2</span><span class="mt">Moteur de calcul</span><span class="mc">TEST 3 · TEST 4</span></div>
+    <div class="mod"><span class="mid">M3</span><span class="mt">Saisie hors ligne</span><span class="mc">TEST 1</span></div>
+    <div class="mod"><span class="mid">M4</span><span class="mt">Synchronisation</span><span class="mc">TEST 2</span></div>
+    <div class="mod"><span class="mid">M5</span><span class="mt">Opérations du jour</span><span class="mc">recherche · annulation</span></div>
+    <div class="mod"><span class="mid">M6</span><span class="mt">Clôture et audit</span><span class="mc">TEST 5 · TEST 6</span></div>
+    <div class="mod"><span class="mid">M7</span><span class="mt">Rapport journalier</span><span class="mc">TEST 7</span></div>
+    <div class="mod"><span class="mid">M8</span><span class="mt">Tableau de bord</span><span class="mc">4 graphiques</span></div>
+    <div class="mod"><span class="mid">M9</span><span class="mt">Creuseurs</span><span class="mc">recherche instantanée</span></div>
+    <div class="mod"><span class="mid">M10</span><span class="mt">Livraison</span><span class="mc">seed · README · sauvegarde</span></div>
+  </div>
+
+  <div class="prose" style="margin-top:34px">
+    <h3>Comment chaque critère de validation est tenu</h3>
+    <p>Chaque test devient une vérification automatisée, pas une démonstration manuelle.</p>
+  </div>
+
+  <div class="tests" style="margin-top:16px">
+    <div class="test"><span class="tn">TEST 1</span><div><div class="tt">10 opérations hors ligne, fermeture, réouverture</div><div class="tm">Transaction Dexie atomique <code>operations</code> + <code>outbox</code> — vérifié par Playwright en contexte hors ligne, avec rechargement complet du contexte navigateur.</div></div></div>
+    <div class="test"><span class="tn">TEST 2</span><div><div class="tt">Synchronisation une seule fois</div><div class="tm">UUID d'appareil + <code>Idempotency-Key</code> + <code>ON CONFLICT DO UPDATE</code> à garde de version — double envoi du même lot, 10 lignes attendues.</div></div></div>
+    <div class="test"><span class="tn">TEST 3</span><div><div class="tt">Ancien tarif préservé</div><div class="tm">Snapshot dans <code>operations.calcul</code> + barèmes <code>valide_du</code>/<code>valide_au</code> + aucun chemin de recalcul — test unitaire du moteur et test bout en bout.</div></div></div>
+    <div class="test"><span class="tn">TEST 4</span><div><div class="tt">Nouvelle matière et son barème</div><div class="tm">Création puis saisie QTY + teneur, montant attendu — test unitaire paramétré sur <code>@coomidec/core</code>.</div></div></div>
+    <div class="test"><span class="tn">TEST 5</span><div><div class="tt">Clôture et verrouillage</div><div class="tm"><code>clotures_journalieres</code> + <code>operations.verrouillee</code> + totaux figés — rejet API vérifié à l'écriture.</div></div></div>
+    <div class="test"><span class="tn">TEST 6</span><div><div class="tt">Modification après clôture</div><div class="tm">Rejet <code>409</code>, procédure de correction contrôlée, entrée d'audit avec ancienne et nouvelle valeur — le test vérifie que la tentative échoue <strong>et</strong> que la trace existe.</div></div></div>
+    <div class="test"><span class="tn">TEST 7</span><div><div class="tt">Export PDF du rapport</div><div class="tm">Génération par pdf-lib côté client, donc fonctionnelle hors ligne — Playwright contrôle le téléchargement et le contenu.</div></div></div>
+  </div>
+
+  <div class="closing">
+    <span class="eyebrow">Prochaine étape</span>
+    <p>Validation des quatre questions bloquantes — <strong>Q1, Q4, Q5, Q8</strong> — puis démarrage du module <strong>M0</strong>.</p>
+    <p style="color:var(--muted);font-size:14px">Les autres points peuvent être tranchés au fil de l'eau : les recommandations par défaut sont appliquées et restent modifiables dans <em>Paramètres</em>, sans toucher au code.</p>
+  </div>
+
+</section>
+
+  </main>
+</div>
+</div>

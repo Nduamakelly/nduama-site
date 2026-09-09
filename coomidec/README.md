@@ -39,6 +39,11 @@ Trois limites que l'application corrige :
 
 React 18 + TypeScript + Vite (PWA, Workbox) · Dexie / IndexedDB · Fastify + Kysely · PostgreSQL 16 · moteur de calcul partagé client/serveur dans `packages/core`.
 
+## Version consultable
+
+Dossier de conception mis en page : https://claude.ai/code/artifact/a003aeb1-ecf3-4e99-a03e-73487a2a0e48
+(source : `docs/dossier-conception.html`)
+
 ## Prochaine étape
 
 Validation des **4 questions bloquantes** de [`docs/06-QUESTIONS-METIER.md`](docs/06-QUESTIONS-METIER.md) — Q1, Q4, Q5, Q8 — puis démarrage du module **M0**.

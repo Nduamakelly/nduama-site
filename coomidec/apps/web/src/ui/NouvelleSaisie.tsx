@@ -97,6 +97,7 @@ export function NouvelleSaisie({ contexte, matieres, baremesParMatiere, onEnregi
           </div>
         </div>
 
+        <div className="duo">
         <div className="champ">
           <span className="etiquette">
             Quantité <span className="obl">*</span>
@@ -114,6 +115,7 @@ export function NouvelleSaisie({ contexte, matieres, baremesParMatiere, onEnregi
             valeur={teneur} onChange={setTeneur} decimales={3}
             libelle="Teneur en pourcentage" suffixe="%" testId="teneur"
           />
+        </div>
         </div>
 
         <div className="champ">

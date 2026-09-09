@@ -75,7 +75,12 @@ export function App() {
         const t = setTimeout(() => c.abort(), 4000);
         const r = await fetch('/api/sante', { signal: c.signal, cache: 'no-store' });
         clearTimeout(t);
-        if (vivant) setEnLigne(r.ok);
+        // Un simple 200 ne suffit pas : un portail captif ou une page de repli
+        // en renvoie un aussi. Seule une réponse JSON de NOTRE API compte.
+        const json = r.ok && r.headers.get('content-type')?.includes('application/json')
+          ? ((await r.json()) as { statut?: string })
+          : null;
+        if (vivant) setEnLigne(json?.statut === 'OK');
       } catch {
         if (vivant) setEnLigne(false);
       }

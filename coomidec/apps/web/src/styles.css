@@ -68,6 +68,10 @@ main { padding: 20px; max-width: 1100px; margin: 0 auto; }
 /* --- formulaire --- */
 .carte { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 18px 20px; }
 .champ { margin-bottom: 20px; }
+/* Quantité et teneur côte à côte dès qu'il y a la place : sur une tablette
+   10" en paysage, l'agent voit les deux pavés sans faire défiler. */
+.duo { display: grid; gap: 0 24px; }
+@media (min-width: 900px) { .duo { grid-template-columns: 1fr 1fr; } }
 .etiquette { display: block; font-weight: 700; font-size: 15px; margin-bottom: 9px; }
 .etiquette .obl { color: var(--rouille); }
 .choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }

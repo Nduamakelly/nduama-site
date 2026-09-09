@@ -4,9 +4,9 @@ Remplacement progressif du classeur *COOMIDEC Système Simplifié Gestion Site*
 par une application web progressive (PWA) **offline-first**, utilisable sur
 tablette Android sur les sites, sans connexion Internet.
 
-> **État actuel : modules M0, M1 et M2 livrés.** 62 tests au vert.
+> **État actuel : modules M0, M1, M2 et M3 livrés.** 76 tests + 2 tests de navigateur.
 > Les quatre questions bloquantes sont tranchées ([`docs/08-DECISIONS.md`](docs/08-DECISIONS.md)).
-> Prochaine étape : M3 (saisie hors ligne) et M4 (synchronisation).
+> Le **TEST 1** est vérifié. Prochaine étape : M4 (synchronisation, **TEST 2**).
 
 ## Documents de conception
 
@@ -46,7 +46,8 @@ POSTGRES_PASSWORD=… JWT_SECRET=… docker compose up
 
 ```bash
 npm run typecheck
-npm test                      # 62 tests : 43 moteur de calcul + 19 API
+npm test                      # 76 tests : 43 moteur + 19 API + 14 base locale
+npm run e2e --workspace @coomidec/web   # TEST 1 dans un vrai navigateur
 ```
 
 Les tests de l'API tournent contre un vrai PostgreSQL — renseignez `DATABASE_URL`
@@ -72,6 +73,28 @@ premières, un barème, six creuseurs et trois comptes (`admin`, `superviseur`, 
 
 **Ces données sont entièrement fictives et ne doivent jamais servir de données réelles
 COOMIDEC.** Le classeur fourni était vide : il n'existe aucun historique à reprendre.
+
+## Tablette — `apps/web`
+
+PWA React 18 + Vite + Dexie, installable, utilisable sans réseau.
+
+```bash
+npm run dev   --workspace @coomidec/web    # http://localhost:5173
+npm run build --workspace @coomidec/web
+```
+
+L'écriture d'une opération et son entrée de file de synchronisation sont
+faites **dans une seule transaction IndexedDB** : les deux réussissent ou
+échouent ensemble. C'est ce qui garantit le TEST 1 — pas la discipline du
+code appelant.
+
+| Fichier | Rôle |
+|---|---|
+| `src/db/dexie.ts` | Schéma local : `operations`, `outbox`, référentiels, `meta` |
+| `src/db/operations.ts` | Écriture atomique, annulation à motif, aperçu de calcul |
+| `src/db/numero.ts` | Numéro définitif dès la création, journée métier locale |
+| `src/db/referentiels.ts` | Matières, barèmes, recherche instantanée des creuseurs |
+| `e2e/test1-hors-ligne.spec.ts` | **TEST 1** — serveur arrêté, application fermée puis rouverte |
 
 ## Moteur de calcul — `packages/core`
 

@@ -7,7 +7,7 @@ Chaque module est livrable, testé et démontrable indépendamment. L'ordre est 
 | **M0 — Socle** ✅ | Monorepo, TypeScript, CI, Docker, schéma PostgreSQL, migrations, authentification, rôles | — |
 | **M1 — Paramètres** ✅ | Sites, unités, matières premières, barèmes historisés, simulateur | prépare TEST 3, TEST 4 |
 | **M2 — Moteur de calcul** ✅ | `@coomidec/core`, évaluateur de formules, snapshot, suite de tests | **TEST 3**, **TEST 4** |
-| **M3 — Saisie hors ligne** | PWA installable, Dexie, formulaire, écriture atomique, aperçu de calcul en direct | **TEST 1** |
+| **M3 — Saisie hors ligne** ✅ | PWA installable, Dexie, formulaire, écriture atomique, aperçu de calcul en direct | **TEST 1** |
 | **M4 — Synchronisation** | Outbox, idempotence, temporisation, écran Synchronisation, pull incrémental | **TEST 2** |
 | **M5 — Opérations du jour** | Liste, recherche, filtres, détail, modification, annulation avec motif | — |
 | **M6 — Clôture et audit** | Pré-clôture, verrouillage, journal d'audit, procédure de correction contrôlée | **TEST 5**, **TEST 6** |
@@ -18,8 +18,11 @@ Chaque module est livrable, testé et démontrable indépendamment. L'ordre est 
 
 ## État au 9 septembre 2026
 
-**M0, M1 et M2 sont livrés** — 62 tests au vert (43 sur le moteur de calcul, 19 sur l'API,
-ces derniers exécutés contre un vrai PostgreSQL 16).
+**M0, M1, M2 et M3 sont livrés** — 76 tests au vert (43 moteur de calcul, 19 API contre un
+vrai PostgreSQL 16, 14 base locale de la tablette) plus 2 tests de navigateur.
+
+Le **TEST 1** est vérifié dans un vrai Chromium, sur un profil disque persistant fermé puis
+rouvert, avec le serveur réellement arrêté — pas une coupure réseau simulée.
 
 Les invariants les plus sensibles sont tenus par **la base de données**, pas seulement
 par le code applicatif — ils résistent donc aussi à une écriture directe en SQL :

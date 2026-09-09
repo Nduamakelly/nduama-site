@@ -53,3 +53,24 @@ jobs:
 
       - name: Tests
         run: npm test
+
+  navigateur:
+    name: TEST 1 — hors ligne dans un vrai navigateur
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: coomidec/package-lock.json
+
+      - run: npm ci
+
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: coomidec/apps/web
+
+      - name: Critères de validation navigateur
+        run: npm run e2e --workspace @coomidec/web

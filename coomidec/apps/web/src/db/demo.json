@@ -1,0 +1,157 @@
+{
+  "site": {
+    "id": "11111111-0000-4000-8000-000000000001",
+    "code": "SITE-DEMO",
+    "nom": "Site de démonstration"
+  },
+  "responsable": {
+    "id": "11111111-0000-4000-8000-000000000002",
+    "nom": "Agent de terrain DÉMO"
+  },
+  "matieres": [
+    {
+      "id": "22222222-0000-4000-8000-000000000001",
+      "code": "CU",
+      "nom": "Cuivre",
+      "methode": "PRIX_PAR_POURCENT",
+      "prixParPourcent": "140",
+      "pctCoutDefaut": "1",
+      "formule": null,
+      "devise": "USD",
+      "uniteCode": "T",
+      "decimalesMontant": 2,
+      "actif": true
+    },
+    {
+      "id": "22222222-0000-4000-8000-000000000002",
+      "code": "CO",
+      "nom": "Cobalt",
+      "methode": "BAREME_TRANCHES",
+      "prixParPourcent": null,
+      "pctCoutDefaut": "1",
+      "formule": null,
+      "devise": "USD",
+      "uniteCode": "T",
+      "decimalesMontant": 2,
+      "actif": true
+    }
+  ],
+  "baremes": [
+    {
+      "id": "33333333-0000-4000-8000-000000000001",
+      "matiereId": "22222222-0000-4000-8000-000000000002",
+      "teneurMin": "0",
+      "teneurMax": "1",
+      "coutUnitaire": "200",
+      "pctCout": "0.9",
+      "devise": "USD",
+      "valideDu": "2026-01-01T00:00:00+02:00",
+      "valideAu": null,
+      "versionBareme": 1
+    },
+    {
+      "id": "33333333-0000-4000-8000-000000000002",
+      "matiereId": "22222222-0000-4000-8000-000000000002",
+      "teneurMin": "1",
+      "teneurMax": "2",
+      "coutUnitaire": "350",
+      "pctCout": "0.9",
+      "devise": "USD",
+      "valideDu": "2026-01-01T00:00:00+02:00",
+      "valideAu": null,
+      "versionBareme": 1
+    },
+    {
+      "id": "33333333-0000-4000-8000-000000000003",
+      "matiereId": "22222222-0000-4000-8000-000000000002",
+      "teneurMin": "2",
+      "teneurMax": "5",
+      "coutUnitaire": "520",
+      "pctCout": "0.85",
+      "devise": "USD",
+      "valideDu": "2026-01-01T00:00:00+02:00",
+      "valideAu": null,
+      "versionBareme": 1
+    }
+  ],
+  "creuseurs": [
+    {
+      "id": "44444444-0000-4000-8000-000000000001",
+      "code": "CR-0001",
+      "nom": "DEMO-A",
+      "postnom": "Fictif",
+      "prenom": "Un",
+      "telephone": "+243 000 000 001",
+      "numeroCarte": "DEMO-CARTE-0001",
+      "dateExpirationCarte": "2027-07-06",
+      "equipe": "Équipe 1",
+      "siteId": "11111111-0000-4000-8000-000000000001",
+      "statut": "ACTIF"
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000002",
+      "code": "CR-0002",
+      "nom": "DEMO-B",
+      "postnom": "Fictif",
+      "prenom": "Deux",
+      "telephone": "+243 000 000 002",
+      "numeroCarte": "DEMO-CARTE-0002",
+      "dateExpirationCarte": "2027-07-06",
+      "equipe": "Équipe 1",
+      "siteId": "11111111-0000-4000-8000-000000000001",
+      "statut": "ACTIF"
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000003",
+      "code": "CR-0003",
+      "nom": "DEMO-C",
+      "postnom": "Fictif",
+      "prenom": "Trois",
+      "telephone": "+243 000 000 003",
+      "numeroCarte": "DEMO-CARTE-0003",
+      "dateExpirationCarte": "2026-09-21",
+      "equipe": "Équipe 1",
+      "siteId": "11111111-0000-4000-8000-000000000001",
+      "statut": "ACTIF"
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000004",
+      "code": "CR-0004",
+      "nom": "DEMO-D",
+      "postnom": "Fictif",
+      "prenom": "Quatre",
+      "telephone": "+243 000 000 004",
+      "numeroCarte": "DEMO-CARTE-0004",
+      "dateExpirationCarte": "2027-07-06",
+      "equipe": "Équipe 2",
+      "siteId": "11111111-0000-4000-8000-000000000001",
+      "statut": "ACTIF"
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000005",
+      "code": "CR-0005",
+      "nom": "DEMO-E",
+      "postnom": "Fictif",
+      "prenom": "Cinq",
+      "telephone": "+243 000 000 005",
+      "numeroCarte": "DEMO-CARTE-0005",
+      "dateExpirationCarte": "2027-07-06",
+      "equipe": "Équipe 2",
+      "siteId": "11111111-0000-4000-8000-000000000001",
+      "statut": "ACTIF"
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000006",
+      "code": "CR-0006",
+      "nom": "DEMO-F",
+      "postnom": "Fictif",
+      "prenom": "Six",
+      "telephone": "+243 000 000 006",
+      "numeroCarte": "DEMO-CARTE-0006",
+      "dateExpirationCarte": "2027-07-06",
+      "equipe": "Équipe 2",
+      "siteId": "11111111-0000-4000-8000-000000000001",
+      "statut": "ACTIF"
+    }
+  ]
+}

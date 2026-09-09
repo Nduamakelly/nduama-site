@@ -1,0 +1,35 @@
+# Plan de livraison par modules
+
+Chaque module est livrable, testé et démontrable indépendamment. L'ordre est contraint par les dépendances : le moteur de calcul avant la saisie, la saisie avant la synchronisation, la synchronisation avant la clôture.
+
+| Module | Contenu | Critère de validation couvert |
+|---|---|---|
+| **M0 — Socle** | Monorepo, TypeScript, CI, Docker, schéma PostgreSQL, migrations, authentification, rôles | — |
+| **M1 — Paramètres** | Sites, unités, matières premières, barèmes historisés, écran Barèmes avec simulateur | prépare TEST 3, TEST 4 |
+| **M2 — Moteur de calcul** | `@coomidec/core`, évaluateur de formules, snapshot, suite de tests | **TEST 3**, **TEST 4** |
+| **M3 — Saisie hors ligne** | PWA installable, Dexie, formulaire, écriture atomique, aperçu de calcul en direct | **TEST 1** |
+| **M4 — Synchronisation** | Outbox, idempotence, temporisation, écran Synchronisation, pull incrémental | **TEST 2** |
+| **M5 — Opérations du jour** | Liste, recherche, filtres, détail, modification, annulation avec motif | — |
+| **M6 — Clôture et audit** | Pré-clôture, verrouillage, journal d'audit, procédure de correction contrôlée | **TEST 5**, **TEST 6** |
+| **M7 — Rapport journalier** | Rendu A4, aperçu, PDF hors ligne, impression | **TEST 7** |
+| **M8 — Tableau de bord** | Indicateurs, filtres, quatre graphiques | — |
+| **M9 — Creuseurs** | Registre, recherche instantanée, alertes d'expiration de carte | — |
+| **M10 — Livraison** | Jeu de données fictif, README, installation, sauvegarde/restauration, guide agent | — |
+
+## Correspondance avec les critères de validation
+
+| Test | Mécanisme technique | Vérification automatisée |
+|---|---|---|
+| **1** — 10 opérations hors ligne, fermeture, réouverture | Transaction Dexie atomique `operations` + `outbox` | Playwright, contexte hors ligne, rechargement complet du contexte |
+| **2** — Synchronisation unique | UUID d'appareil + `Idempotency-Key` + `ON CONFLICT DO UPDATE` avec garde de version | Test d'intégration : double envoi du même lot → 10 lignes |
+| **3** — Ancien tarif préservé | Snapshot dans `operations.calcul` + barèmes `valide_du`/`valide_au` + aucun recalcul | Test unitaire du moteur + test d'intégration bout en bout |
+| **4** — Nouvelle matière et barème | `@coomidec/core` avec le barème actif | Test unitaire paramétré |
+| **5** — Clôture et verrouillage | `clotures_journalieres` + `operations.verrouillee` + `totaux` figés | Test d'intégration + rejet API à l'écriture |
+| **6** — Modification après clôture | Rejet `409`, procédure de correction, entrée `audit_logs` avec ancienne et nouvelle valeur | Test d'intégration : la tentative échoue **et** l'audit existe |
+| **7** — Export PDF | pdf-lib côté client, fonctionne hors ligne | Playwright : téléchargement, ouverture, contrôle du contenu |
+
+## Livrables finaux
+
+Code source complet · schéma et migrations PostgreSQL · jeu de données fictif marqué `DÉMONSTRATION` · PWA installable · fonctionnement hors ligne · synchronisation · rapports PDF · README · instructions d'installation · procédures de sauvegarde et de restauration · tests du moteur de calcul · tests de synchronisation hors ligne/en ligne.
+
+**Les données fictives ne seront jamais présentées comme des données réelles COOMIDEC** : elles portent un site nommé `SITE-DEMO`, un bandeau visible dans l'interface et un marqueur en base.

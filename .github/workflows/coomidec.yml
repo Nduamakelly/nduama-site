@@ -55,7 +55,7 @@ jobs:
         run: npm test
 
   navigateur:
-    name: TEST 1 — hors ligne dans un vrai navigateur
+    name: Critères de terrain — TEST 1 et TEST 2
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,5 +72,5 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: coomidec/apps/web
 
-      - name: Critères de validation navigateur
+      - name: Hors ligne et synchronisation, dans un vrai navigateur
         run: npm run e2e --workspace @coomidec/web

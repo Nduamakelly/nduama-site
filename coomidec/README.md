@@ -4,9 +4,9 @@ Remplacement progressif du classeur *COOMIDEC Système Simplifié Gestion Site*
 par une application web progressive (PWA) **offline-first**, utilisable sur
 tablette Android sur les sites, sans connexion Internet.
 
-> **État actuel : conception validée, module M2 livré.**
-> Les quatre questions bloquantes ont été tranchées ([`docs/08-DECISIONS.md`](docs/08-DECISIONS.md))
-> et le moteur de calcul `@coomidec/core` est écrit et testé (43 tests).
+> **État actuel : modules M0, M1 et M2 livrés.** 62 tests au vert.
+> Les quatre questions bloquantes sont tranchées ([`docs/08-DECISIONS.md`](docs/08-DECISIONS.md)).
+> Prochaine étape : M3 (saisie hors ligne) et M4 (synchronisation).
 
 ## Documents de conception
 
@@ -22,12 +22,58 @@ tablette Android sur les sites, sans connexion Internet.
 | [`docs/07-PLAN-LIVRAISON.md`](docs/07-PLAN-LIVRAISON.md) | Modules M0 → M10 et couverture des sept critères de validation |
 | [`docs/08-DECISIONS.md`](docs/08-DECISIONS.md) | **D1, D4, D5, D8** — décisions validées et leurs conséquences |
 
-## Moteur de calcul — `packages/core`
+## Installation
+
+Il faut Node 20+ et PostgreSQL 16.
 
 ```bash
+cd coomidec
+cp .env.example .env          # puis renseignez DATABASE_URL et JWT_SECRET
 npm install
-npm test          # 43 tests, dont TEST 3 et TEST 4 des critères de validation
+npm run migrate --workspace @coomidec/api
+npm run seed    --workspace @coomidec/api   # jeu de démonstration, facultatif
+npm run start   --workspace @coomidec/api
 ```
+
+Ou bien, tout d'un coup :
+
+```bash
+cd coomidec/infra
+POSTGRES_PASSWORD=… JWT_SECRET=… docker compose up
+```
+
+### Vérifier
+
+```bash
+npm run typecheck
+npm test                      # 62 tests : 43 moteur de calcul + 19 API
+```
+
+Les tests de l'API tournent contre un vrai PostgreSQL — renseignez `DATABASE_URL`
+avant de les lancer. La CI (`.github/workflows/coomidec.yml`) démarre un service
+`postgres:16` pour eux.
+
+### Sauvegarde et restauration
+
+```bash
+export DATABASE_URL=… BACKUP_PASSPHRASE=…
+./infra/sauvegarde.sh ./sauvegardes          # pg_dump + gzip + chiffrement AES256
+./infra/restauration.sh ./sauvegardes/coomidec-20260909-1400.sql.gz.gpg
+```
+
+La base contient des données personnelles de creuseurs (nom, téléphone, numéro de
+carte artisanale) : `BACKUP_PASSPHRASE` n'est pas facultatif en production, et la
+restauration exige une confirmation explicite parce qu'elle écrase la base cible.
+
+### Jeu de démonstration
+
+`npm run seed` crée un site `SITE-DEMO` marqué `demonstration = true`, deux matières
+premières, un barème, six creuseurs et trois comptes (`admin`, `superviseur`, `agent`).
+
+**Ces données sont entièrement fictives et ne doivent jamais servir de données réelles
+COOMIDEC.** Le classeur fourni était vide : il n'existe aucun historique à reprendre.
+
+## Moteur de calcul — `packages/core`
 
 Fonction pure, sans I/O, partagée entre la tablette et le serveur :
 
@@ -48,6 +94,26 @@ calculerOperation({
 | `src/formule.ts` | Évaluateur d'expressions restreint — **sans `eval`** |
 | `src/bareme.ts` | Résolution de tranche, détection des chevauchements et des trous |
 | `src/agregats.ts` | Teneur moyenne pondérée **et** arithmétique, totaux de journée |
+
+## API — `apps/api`
+
+Fastify + Kysely + PostgreSQL 16. Le serveur rejoue le calcul à la réception :
+il ne fait jamais confiance au montant envoyé par la tablette.
+
+| Route | Rôle |
+|---|---|
+| `GET /api/sante` | Sonde de connectivité — l'événement `online` du navigateur ment souvent |
+| `POST /api/auth/connexion` | Jeton JWT ; message identique que l'identifiant existe ou non |
+| `POST /api/auth/pin` | PIN de déverrouillage hors ligne, haché en Argon2id |
+| `GET/POST /api/sites`, `/api/unites` | Référentiels |
+| `GET/POST/PATCH /api/matieres` | Matières premières ; un changement de prix exige un motif |
+| `GET/POST /api/matieres/:id/baremes` | Tranches actives ou historique complet |
+| `PUT /api/baremes/:id` | **Ferme** la tranche et en ouvre une nouvelle — jamais de modification en place |
+| `POST /api/matieres/:id/simuler` | Simulateur de l'écran Paramètres, même moteur que la tablette |
+
+Les invariants critiques sont tenus par la base elle-même (contrainte `EXCLUDE`,
+triggers, `RULE`), pas seulement par le code : ils résistent à une écriture SQL directe.
+Voir [`docs/07-PLAN-LIVRAISON.md`](docs/07-PLAN-LIVRAISON.md).
 
 ## Ce que le classeur fait aujourd'hui
 
@@ -74,8 +140,8 @@ Dossier de conception mis en page : https://claude.ai/code/artifact/a003aeb1-ecf
 
 ## Prochaine étape
 
-Modules **M0** (socle API + PostgreSQL) et **M1** (paramètres, matières, barèmes historisés),
-puis **M3** (saisie hors ligne) et **M4** (synchronisation).
+Module **M3** — PWA installable, saisie hors ligne, écriture atomique dans IndexedDB
+(critère **TEST 1**), puis **M4** — synchronisation idempotente (critère **TEST 2**).
 
 Un point reste à préciser avant la mise en production : le rôle exact de `% COÛT`
 en méthode B — voir la fin de [`docs/08-DECISIONS.md`](docs/08-DECISIONS.md).

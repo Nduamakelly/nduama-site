@@ -1,0 +1,38 @@
+# Pile complète COOMIDEC. `docker compose up` suffit sur un poste local,
+# un VPS ou un serveur à Lubumbashi : aucun service propriétaire requis.
+services:
+  base:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-coomidec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?mot de passe requis}
+      POSTGRES_DB: ${POSTGRES_DB:-coomidec}
+    volumes:
+      - donnees:/var/lib/postgresql/data
+      - ./sauvegardes:/sauvegardes
+    ports: ['${POSTGRES_PORT:-5432}:5432']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-coomidec}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      base: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-coomidec}:${POSTGRES_PASSWORD}@base:5432/${POSTGRES_DB:-coomidec}
+      JWT_SECRET: ${JWT_SECRET:?secret requis, 16 caractères minimum}
+      PORT: 3000
+      NODE_ENV: production
+      FUSEAU_HORAIRE: ${FUSEAU_HORAIRE:-Africa/Lubumbashi}
+    command: sh -c "npm run migrate --workspace @coomidec/api && npm run start --workspace @coomidec/api"
+    ports: ['${API_PORT:-3000}:3000']
+
+volumes:
+  donnees:

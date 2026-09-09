@@ -4,9 +4,9 @@ Chaque module est livrable, testé et démontrable indépendamment. L'ordre est 
 
 | Module | Contenu | Critère de validation couvert |
 |---|---|---|
-| **M0 — Socle** | Monorepo, TypeScript, CI, Docker, schéma PostgreSQL, migrations, authentification, rôles | — |
-| **M1 — Paramètres** | Sites, unités, matières premières, barèmes historisés, écran Barèmes avec simulateur | prépare TEST 3, TEST 4 |
-| **M2 — Moteur de calcul** | `@coomidec/core`, évaluateur de formules, snapshot, suite de tests | **TEST 3**, **TEST 4** |
+| **M0 — Socle** ✅ | Monorepo, TypeScript, CI, Docker, schéma PostgreSQL, migrations, authentification, rôles | — |
+| **M1 — Paramètres** ✅ | Sites, unités, matières premières, barèmes historisés, simulateur | prépare TEST 3, TEST 4 |
+| **M2 — Moteur de calcul** ✅ | `@coomidec/core`, évaluateur de formules, snapshot, suite de tests | **TEST 3**, **TEST 4** |
 | **M3 — Saisie hors ligne** | PWA installable, Dexie, formulaire, écriture atomique, aperçu de calcul en direct | **TEST 1** |
 | **M4 — Synchronisation** | Outbox, idempotence, temporisation, écran Synchronisation, pull incrémental | **TEST 2** |
 | **M5 — Opérations du jour** | Liste, recherche, filtres, détail, modification, annulation avec motif | — |
@@ -15,6 +15,23 @@ Chaque module est livrable, testé et démontrable indépendamment. L'ordre est 
 | **M8 — Tableau de bord** | Indicateurs, filtres, quatre graphiques | — |
 | **M9 — Creuseurs** | Registre, recherche instantanée, alertes d'expiration de carte | — |
 | **M10 — Livraison** | Jeu de données fictif, README, installation, sauvegarde/restauration, guide agent | — |
+
+## État au 9 septembre 2026
+
+**M0, M1 et M2 sont livrés** — 62 tests au vert (43 sur le moteur de calcul, 19 sur l'API,
+ces derniers exécutés contre un vrai PostgreSQL 16).
+
+Les invariants les plus sensibles sont tenus par **la base de données**, pas seulement
+par le code applicatif — ils résistent donc aussi à une écriture directe en SQL :
+
+| Invariant | Mécanisme PostgreSQL |
+|---|---|
+| Deux tranches actives ne peuvent pas se chevaucher | `EXCLUDE USING gist` sur `(matiere_id, numrange, tstzrange)` |
+| Un tarif ne se modifie jamais en place | Trigger `baremes_append_only` + `RULE … DO INSTEAD NOTHING` sur `DELETE` |
+| Le journal d'audit est inaltérable | `RULE` sur `UPDATE` **et** `DELETE` |
+| Une opération clôturée est verrouillée | Trigger `operations_verrou`, levé uniquement par la procédure de correction |
+| La méthode A exige son prix de référence | `CHECK (methode <> 'PRIX_PAR_POURCENT' OR prix_par_pourcent IS NOT NULL)` |
+| Une seule clôture par site et par jour | Index unique partiel |
 
 ## Correspondance avec les critères de validation
 

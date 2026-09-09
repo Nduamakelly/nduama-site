@@ -8,7 +8,7 @@ Chaque module est livrable, testé et démontrable indépendamment. L'ordre est 
 | **M1 — Paramètres** ✅ | Sites, unités, matières premières, barèmes historisés, simulateur | prépare TEST 3, TEST 4 |
 | **M2 — Moteur de calcul** ✅ | `@coomidec/core`, évaluateur de formules, snapshot, suite de tests | **TEST 3**, **TEST 4** |
 | **M3 — Saisie hors ligne** ✅ | PWA installable, Dexie, formulaire, écriture atomique, aperçu de calcul en direct | **TEST 1** |
-| **M4 — Synchronisation** | Outbox, idempotence, temporisation, écran Synchronisation, pull incrémental | **TEST 2** |
+| **M4 — Synchronisation** ✅ | Outbox, idempotence, temporisation, écran Synchronisation, pull incrémental | **TEST 2** |
 | **M5 — Opérations du jour** | Liste, recherche, filtres, détail, modification, annulation avec motif | — |
 | **M6 — Clôture et audit** | Pré-clôture, verrouillage, journal d'audit, procédure de correction contrôlée | **TEST 5**, **TEST 6** |
 | **M7 — Rapport journalier** | Rendu A4, aperçu, PDF hors ligne, impression | **TEST 7** |
@@ -18,11 +18,25 @@ Chaque module est livrable, testé et démontrable indépendamment. L'ordre est 
 
 ## État au 9 septembre 2026
 
-**M0, M1, M2 et M3 sont livrés** — 76 tests au vert (43 moteur de calcul, 19 API contre un
-vrai PostgreSQL 16, 14 base locale de la tablette) plus 2 tests de navigateur.
+**M0 à M4 sont livrés.** Les **TEST 1, 2, 3 et 4** sont vérifiés automatiquement.
 
-Le **TEST 1** est vérifié dans un vrai Chromium, sur un profil disque persistant fermé puis
-rouvert, avec le serveur réellement arrêté — pas une coupure réseau simulée.
+Les deux scénarios de terrain tournent dans un vrai Chromium, sur un profil disque
+persistant, avec le serveur réellement arrêté puis redémarré — pas une coupure simulée.
+
+### Les trois protections contre les doublons (TEST 2)
+
+| # | Protection | Où | Ce qu'elle empêche |
+|---|---|---|---|
+| 1 | UUID généré sur l'appareil | tablette | Un renvoi vise la même ligne, jamais une seconde |
+| 2 | Clé d'idempotence `{id}:{version}` | serveur | Un rejeu exact renvoie la réponse mémorisée, sans réécriture |
+| 3 | Garde de version en SQL | base | Une charge périmée ne peut pas écraser une donnée plus récente |
+
+Elles sont **indépendantes** : les tests vérifient que la garde SQL protège encore la donnée
+après purge des clés d'idempotence, trente jours plus tard.
+
+Une opération n'est retirée de la file **qu'après un accusé serveur la nommant
+explicitement**. Si le serveur en oublie une dans sa réponse, elle reste en file : mieux vaut
+un doublon rattrapé par l'idempotence qu'une opération perdue.
 
 Les invariants les plus sensibles sont tenus par **la base de données**, pas seulement
 par le code applicatif — ils résistent donc aussi à une écriture directe en SQL :

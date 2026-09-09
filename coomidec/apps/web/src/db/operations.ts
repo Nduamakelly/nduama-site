@@ -122,6 +122,7 @@ export async function enregistrerOperation(
       matiereId: saisie.matiere.id,
       matiereNom: saisie.matiere.nom,
       qty: saisie.qty,
+      uniteId: saisie.matiere.uniteId,
       uniteCode: saisie.matiere.uniteCode,
       teneur: saisie.teneur,
       observation: saisie.observation?.trim() || null,

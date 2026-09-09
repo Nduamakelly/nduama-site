@@ -7,6 +7,7 @@ import { routesAuth } from './routes/auth.js';
 import { routesReferentiels } from './routes/referentiels.js';
 import { routesMatieres } from './routes/matieres.js';
 import { routesBaremes } from './routes/baremes.js';
+import { routesSync } from './routes/sync.js';
 
 export interface AppCoomidec {
   app: FastifyInstance;
@@ -28,6 +29,7 @@ export async function construireApp(config: Config, dbFournie?: Db): Promise<App
   await app.register(routesReferentiels, { db });
   await app.register(routesMatieres, { db });
   await app.register(routesBaremes, { db });
+  await app.register(routesSync, { db });
 
   app.setErrorHandler((err: FastifyError, req, rep) => {
     req.log.error({ err }, 'erreur non gérée');

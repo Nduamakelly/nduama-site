@@ -1,7 +1,7 @@
 interface Props {
   nbOperations: number;
   nbEnAttente: number;
-  onNaviguer: (vue: 'saisie' | 'jour') => void;
+  onNaviguer: (vue: 'saisie' | 'jour' | 'sync') => void;
 }
 
 /** Huit tuiles, la saisie dominante : c'est 95 % de l'usage sur le terrain. */
@@ -22,7 +22,7 @@ export function Accueil({ nbOperations, nbEnAttente, onNaviguer }: Props) {
           <span className="s">{nbOperations} enregistrée{nbOperations > 1 ? 's' : ''}</span>
         </button>
 
-        <button type="button" className="tuile" onClick={aVenir('Synchronisation')} data-testid="tuile-sync">
+        <button type="button" className="tuile" onClick={() => onNaviguer('sync')} data-testid="tuile-sync">
           <span className="t">SYNCHRONISATION</span>
           <span className="s">{nbEnAttente > 0 ? `${nbEnAttente} en attente` : 'Rien en attente'}</span>
         </button>

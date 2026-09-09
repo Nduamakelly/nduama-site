@@ -27,6 +27,7 @@ export interface OperationLocale {
   matiereId: string;
   matiereNom: string;
   qty: string;
+  uniteId: string;          // requis par le serveur (clé étrangère)
   uniteCode: string;
   teneur: string;
   observation: string | null;
@@ -65,6 +66,7 @@ export interface MatiereLocale {
   pctCoutDefaut: string;
   formule: string | null;
   devise: string;
+  uniteId: string;
   uniteCode: string;
   decimalesMontant: number;
   actif: boolean;

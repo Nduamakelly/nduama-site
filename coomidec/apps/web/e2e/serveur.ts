@@ -22,14 +22,53 @@ const TYPES: Record<string, string> = {
 
 export interface ServeurStatique {
   base: string;
+  port: number;
+  /** Identifiants d'opérations reçus par /api/sync/push, dans l'ordre. */
+  recus: string[];
+  /** Nombre de lots reçus : permet de vérifier qu'on ne renvoie pas pour rien. */
+  lots: number;
   arreter: () => Promise<void>;
 }
 
-export async function demarrerServeur(racine: string): Promise<ServeurStatique> {
+/**
+ * `port` permet de redémarrer sur la MÊME origine après une coupure : sans
+ * cela le service worker et IndexedDB, qui sont liés à l'origine, seraient
+ * perdus et le test ne prouverait rien.
+ */
+export async function demarrerServeur(racine: string, port = 0): Promise<ServeurStatique> {
   const sockets = new Set<Socket>();
+  const etat = { recus: [] as string[], lots: 0 };
 
   const serveur: Server = createServer((req, res) => {
-    const chemin = decodeURIComponent((req.url ?? '/').split('?')[0] ?? '/');
+    const url = (req.url ?? '/').split('?')[0] ?? '/';
+
+    // Sonde de connectivité : l'application exige du JSON portant statut OK.
+    if (url === '/api/sante') {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.end(JSON.stringify({ statut: 'OK', heureServeur: new Date().toISOString() }));
+      return;
+    }
+
+    // Bouchon de synchronisation : il note ce qu'il reçoit, ce qui permet de
+    // vérifier que chaque opération n'arrive qu'une fois.
+    if (url === '/api/sync/push' && req.method === 'POST') {
+      let corps = '';
+      req.on('data', (c) => { corps += c; });
+      req.on('end', () => {
+        const { operations } = JSON.parse(corps || '{}') as { operations?: { id: string }[] };
+        const ids = (operations ?? []).map((o) => o.id);
+        etat.recus.push(...ids);
+        etat.lots += 1;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify({
+          heureServeur: new Date().toISOString(),
+          resultats: ids.map((id) => ({ id, etat: 'APPLIQUEE' })),
+        }));
+      });
+      return;
+    }
+
+    const chemin = decodeURIComponent(url);
     // Le service worker doit être servi depuis la racine pour avoir la portée.
     let fichier = join(racine, normalize(chemin).replace(/^(\.\.[/\\])+/, ''));
     if (!existsSync(fichier) || statSync(fichier).isDirectory()) {
@@ -46,11 +85,14 @@ export async function demarrerServeur(racine: string): Promise<ServeurStatique> 
     s.on('close', () => sockets.delete(s));
   });
 
-  await new Promise<void>((ok) => serveur.listen(0, '127.0.0.1', ok));
-  const { port } = serveur.address() as AddressInfo;
+  await new Promise<void>((ok) => serveur.listen(port, '127.0.0.1', ok));
+  const portReel = (serveur.address() as AddressInfo).port;
 
   return {
-    base: `http://127.0.0.1:${port}`,
+    base: `http://127.0.0.1:${portReel}`,
+    port: portReel,
+    get recus() { return etat.recus; },
+    get lots() { return etat.lots; },
     async arreter() {
       // Les connexions ouvertes (keep-alive) doivent tomber aussi, sinon la
       // coupure ne serait pas totale.

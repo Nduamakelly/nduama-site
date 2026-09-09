@@ -15,7 +15,7 @@ const CTX: ContexteSaisie = {
 const CUIVRE: MatiereLocale = {
   id: 'mat-cu', code: 'CU', nom: 'Cuivre', methode: 'PRIX_PAR_POURCENT',
   prixParPourcent: '140', pctCoutDefaut: '1', formule: null,
-  devise: 'USD', uniteCode: 'T', decimalesMontant: 2, actif: true,
+  devise: 'USD', uniteId: 'unite-t', uniteCode: 'T', decimalesMontant: 2, actif: true,
 };
 
 const COBALT: MatiereLocale = {
@@ -52,6 +52,7 @@ describe('enregistrement d une opération', () => {
     expect(op.numero).toBe('COOMIDEC/KOL/20260909/A7F3-001');
     expect(op.syncStatus).toBe('EN_ATTENTE');
     expect(op.creuseurId).toBe('cr-1');
+    expect(op.uniteId).toBe('unite-t');   // requis par le serveur
 
     expect(await db.operations.count()).toBe(1);
     const file = await db.outbox.toArray();

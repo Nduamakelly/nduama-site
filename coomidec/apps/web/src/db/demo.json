@@ -20,7 +20,8 @@
       "devise": "USD",
       "uniteCode": "T",
       "decimalesMontant": 2,
-      "actif": true
+      "actif": true,
+      "uniteId": "55555555-0000-4000-8000-000000000001"
     },
     {
       "id": "22222222-0000-4000-8000-000000000002",
@@ -33,7 +34,8 @@
       "devise": "USD",
       "uniteCode": "T",
       "decimalesMontant": 2,
-      "actif": true
+      "actif": true,
+      "uniteId": "55555555-0000-4000-8000-000000000001"
     }
   ],
   "baremes": [
@@ -152,6 +154,14 @@
       "equipe": "Équipe 2",
       "siteId": "11111111-0000-4000-8000-000000000001",
       "statut": "ACTIF"
+    }
+  ],
+  "unites": [
+    {
+      "id": "55555555-0000-4000-8000-000000000001",
+      "code": "T",
+      "libelle": "Tonne",
+      "decimales": 3
     }
   ]
 }

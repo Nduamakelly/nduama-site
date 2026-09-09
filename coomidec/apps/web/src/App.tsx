@@ -10,9 +10,11 @@ import { Bandeau } from './ui/composants/Bandeau.tsx';
 import { Accueil } from './ui/Accueil.tsx';
 import { NouvelleSaisie } from './ui/NouvelleSaisie.tsx';
 import { OperationsDuJour } from './ui/OperationsDuJour.tsx';
+import { Synchronisation } from './ui/Synchronisation.tsx';
+import { synchroniser, transportHttp } from './sync/moteur.ts';
 import { fr } from './ui/composants/BandeauCalcul.tsx';
 
-type Vue = 'accueil' | 'saisie' | 'jour';
+type Vue = 'accueil' | 'saisie' | 'jour' | 'sync';
 
 export function App() {
   const [contexte, setContexte] = useState<ContexteSaisie | null>(null);
@@ -97,6 +99,29 @@ export function App() {
     };
   }, []);
 
+  // Synchronisation d'arrière-plan. Elle ne bloque jamais l'interface : la
+  // saisie continue de fonctionner pendant qu'elle tourne, et un échec est
+  // sans conséquence — la file conserve tout.
+  useEffect(() => {
+    if (!contexte || !enLigne) return;
+    let vivant = true;
+    const transport = transportHttp(() => localStorage.getItem('coomidec:jeton'));
+
+    async function vider(): Promise<void> {
+      if (!vivant || !contexte) return;
+      try {
+        const r = await synchroniser(transport, contexte.deviceId);
+        if (vivant && r.confirmees > 0) await rafraichir(contexte);
+      } catch {
+        // Jamais de remontée d'erreur ici : l'écran Synchronisation la montre.
+      }
+    }
+
+    void vider();
+    const i = setInterval(() => void vider(), 5 * 60_000);
+    return () => { vivant = false; clearInterval(i); };
+  }, [contexte, enLigne, rafraichir]);
+
   useEffect(() => {
     if (!confirmation) return;
     const t = setTimeout(() => setConfirmation(null), 1500);
@@ -123,6 +148,14 @@ export function App() {
         <NouvelleSaisie
           contexte={contexte} matieres={matieres} baremesParMatiere={baremesParMatiere}
           onEnregistre={(op) => { setConfirmation(op); void rafraichir(contexte); }}
+          onQuitter={() => setVue('accueil')}
+        />
+      )}
+
+      {vue === 'sync' && (
+        <Synchronisation
+          deviceId={contexte.deviceId} enLigne={enLigne}
+          onChange={() => void rafraichir(contexte)}
           onQuitter={() => setVue('accueil')}
         />
       )}

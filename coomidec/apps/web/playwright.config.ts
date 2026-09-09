@@ -7,7 +7,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  timeout: 60_000,
+  // Une saisie complète attend la confirmation visuelle (1,5 s) dix fois de
+  // suite : ces scénarios sont longs par nature, pas par lenteur.
+  timeout: 180_000,
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],

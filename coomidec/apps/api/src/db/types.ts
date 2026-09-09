@@ -5,6 +5,8 @@ type Num = ColumnType<string, string | number, string | number>;
 type NumN = ColumnType<string | null, string | number | null, string | number | null>;
 /** Colonne NUMERIC avec DEFAULT : omissible à l'insertion, numérique accepté. */
 type NumGen = ColumnType<string, string | number | undefined, string | number>;
+/** Rang global d'un changement : posé par la base, jamais par l'application. */
+type Seq = ColumnType<string, never, never>;
 type Date_ = ColumnType<Date, Date | string, Date | string>;
 type DateN = ColumnType<Date | null, Date | string | null, Date | string | null>;
 
@@ -17,6 +19,7 @@ export type ActionAudit =
   | 'CORRECTION' | 'CHANGEMENT_TARIF' | 'CONNEXION' | 'REVOCATION_APPAREIL';
 
 export interface SitesTable {
+  sequence_serveur: Seq;
   id: string; code: string; nom: string;
   zea: string | null; territoire: string | null; province: string | null;
   actif: Generated<boolean>; demonstration: Generated<boolean>;
@@ -25,6 +28,7 @@ export interface SitesTable {
 }
 
 export interface UnitesTable {
+  sequence_serveur: Seq;
   id: string; code: string; libelle: string;
   decimales: Generated<number>; facteur_kg: NumN; actif: Generated<boolean>;
   created_at: Generated<Date>; updated_at: Generated<Date>;
@@ -47,6 +51,7 @@ export interface DevicesTable {
 }
 
 export interface MatieresPremieresTable {
+  sequence_serveur: Seq;
   id: string; code: string; nom: string; unite_id: string;
   methode_calcul: MethodeCalculDb;
   prix_par_pourcent: NumN; pct_cout_defaut: NumGen;
@@ -57,6 +62,7 @@ export interface MatieresPremieresTable {
 }
 
 export interface BaremesTeneurTable {
+  sequence_serveur: Seq;
   id: string; matiere_id: string;
   teneur_min: Num; teneur_max: Num; cout_unitaire: Num; pct_cout: NumGen;
   devise: Generated<string>;
@@ -66,6 +72,7 @@ export interface BaremesTeneurTable {
 }
 
 export interface ParametresTable {
+  sequence_serveur: Seq;
   cle: string; portee: Generated<'GLOBAL' | 'SITE'>; site_id: string | null;
   valeur: unknown; updated_at: Generated<Date>; updated_by: string | null;
 }
@@ -80,6 +87,7 @@ export interface AuditLogsTable {
 }
 
 export interface CreuseursTable {
+  sequence_serveur: Seq;
   id: string; code: string; nom: string;
   postnom: string | null; prenom: string | null; sexe: 'H' | 'F' | null;
   telephone: string | null; numero_carte_artisanale: string | null;
@@ -91,6 +99,7 @@ export interface CreuseursTable {
 }
 
 export interface CloturesJournalieresTable {
+  sequence_serveur: Seq;
   id: string; numero: string; site_id: string; date_journee: Date_;
   responsable_id: string; cloture_le: Generated<Date>;
   statut: Generated<'CLOTUREE' | 'REOUVERTE'>;
@@ -104,6 +113,7 @@ export interface CloturesJournalieresTable {
 }
 
 export interface OperationsTable {
+  sequence_serveur: Seq;
   id: string; numero: string; site_id: string; date_operation: Date_; heure: string;
   responsable_id: string; creuseur_id: string; equipe: string | null;
   matiere_id: string; qty: Num; unite_id: string; teneur: Num;
@@ -121,7 +131,14 @@ export interface IdempotencyKeysTable {
   cle: string; reponse: unknown; cree_le: Generated<Date>;
 }
 
+export interface LotsSynchronisationTable {
+  id: string; device_id: string; utilisateur_id: string | null;
+  nb_recus: number; nb_appliques: number; nb_ignores: number; nb_rejetes: number;
+  recu_le: Generated<Date>;
+}
+
 export interface Database {
+  lots_synchronisation: LotsSynchronisationTable;
   sites: SitesTable;
   unites: UnitesTable;
   utilisateurs: UtilisateursTable;

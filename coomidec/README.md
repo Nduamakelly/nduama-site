@@ -4,9 +4,9 @@ Remplacement progressif du classeur *COOMIDEC Système Simplifié Gestion Site*
 par une application web progressive (PWA) **offline-first**, utilisable sur
 tablette Android sur les sites, sans connexion Internet.
 
-> **État actuel : modules M0, M1, M2 et M3 livrés.** 76 tests + 2 tests de navigateur.
-> Les quatre questions bloquantes sont tranchées ([`docs/08-DECISIONS.md`](docs/08-DECISIONS.md)).
-> Le **TEST 1** est vérifié. Prochaine étape : M4 (synchronisation, **TEST 2**).
+> **État actuel : modules M0 à M4 livrés.**
+> Les **TEST 1, 2, 3 et 4** sont vérifiés automatiquement.
+> Prochaine étape : M5 (opérations du jour) et M6 (clôture, **TEST 5 et 6**).
 
 ## Documents de conception
 
@@ -94,7 +94,9 @@ code appelant.
 | `src/db/operations.ts` | Écriture atomique, annulation à motif, aperçu de calcul |
 | `src/db/numero.ts` | Numéro définitif dès la création, journée métier locale |
 | `src/db/referentiels.ts` | Matières, barèmes, recherche instantanée des creuseurs |
+| `src/sync/moteur.ts` | File d'attente, temporisation avec gigue, reprise, export de secours |
 | `e2e/test1-hors-ligne.spec.ts` | **TEST 1** — serveur arrêté, application fermée puis rouverte |
+| `e2e/test2-synchronisation.spec.ts` | **TEST 2** — serveur redémarré, envoi unique vérifié |
 
 ## Moteur de calcul — `packages/core`
 
@@ -133,6 +135,9 @@ il ne fait jamais confiance au montant envoyé par la tablette.
 | `GET/POST /api/matieres/:id/baremes` | Tranches actives ou historique complet |
 | `PUT /api/baremes/:id` | **Ferme** la tranche et en ouvre une nouvelle — jamais de modification en place |
 | `POST /api/matieres/:id/simuler` | Simulateur de l'écran Paramètres, même moteur que la tablette |
+| `POST /api/sync/push` | Montée idempotente d'un lot ; le serveur **rejoue le calcul** et rejette un montant falsifié |
+| `GET /api/sync/pull` | Descente incrémentale par curseur (`sequence_serveur`, ordre total) |
+| `GET /api/sync/etat/:deviceId` | Derniers lots reçus d'un appareil |
 
 Les invariants critiques sont tenus par la base elle-même (contrainte `EXCLUDE`,
 triggers, `RULE`), pas seulement par le code : ils résistent à une écriture SQL directe.

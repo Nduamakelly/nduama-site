@@ -2,11 +2,17 @@
 
 Classement par impact. **Bloquant** = le développement du module concerné ne peut pas commencer sans réponse.
 
+> **Q1, Q4, Q5 et Q8 ont été tranchées** — voir [`08-DECISIONS.md`](08-DECISIONS.md).
+> Elles sont conservées ci-dessous pour mémoire, avec la décision retenue.
+
 ---
 
-## Bloquantes
+## Bloquantes — tranchées
 
-### Q4 — Que signifie exactement `% COÛT` ? *(bloquant — moteur de calcul)*
+### Q4 — Que signifie exactement `% COÛT` ? — **✅ D4**
+
+> **Décision** : la référence est un **prix par 1 % de teneur** (cuivre : 1 % = 140 USD). Méthode A retenue comme méthode de référence. Une précision reste à apporter sur le rôle de `% COÛT` en méthode B — voir `08-DECISIONS.md`.
+
 
 La colonne `PARAMETRES!H` multiplie le montant, mais rien dans le fichier n'en donne la définition. Trois lectures possibles, aux conséquences comptables très différentes :
 
@@ -16,17 +22,26 @@ La colonne `PARAMETRES!H` multiplie le montant, mais rien dans le fichier n'en d
 
 Sans cette définition, l'intitulé du rapport journalier et le traitement comptable ne peuvent pas être écrits correctement.
 
-### Q5 — « Coût » ou « valeur » ? *(bloquant — rapports)*
+### Q5 — « Coût » ou « valeur » ? — **✅ D5**
+
+> **Décision** : **valeur de la production**. Les écrans et rapports parlent de « VALEUR », pas de « coût ».
+
 
 Le fichier dit `COÛT CALCULÉ`. S'agit-il de ce que **COOMIDEC paie** au creuseur pour le minerai, ou de la **valeur estimée** de la production ? Le même nombre ne se lit pas de la même façon dans un rapport de production et dans un journal de trésorerie.
 
-### Q1 — Teneur moyenne : arithmétique ou pondérée par la QTY ? *(bloquant — rapports, tableau de bord)*
+### Q1 — Teneur moyenne : arithmétique ou pondérée ? — **✅ D1**
+
+> **Décision** : **les deux affichées** — pondérée par la QTY en indicateur principal, arithmétique à côté pour la continuité avec le classeur.
+
 
 Le fichier calcule `SUMIF(teneur)/COUNTIF` — une **moyenne arithmétique simple**. Pour du minerai, c'est statistiquement faux : une opération de 0,5 t à 8 % pèse autant qu'une opération de 40 t à 2 %.
 
 **Recommandation** : la teneur moyenne du site devient la **moyenne pondérée par la QTY** (`Σ(qty × teneur) / Σ qty`), et la moyenne arithmétique reste affichée à côté, explicitement libellée, pour la continuité avec le fichier Excel.
 
-### Q8 — Une opération est-elle rattachée à un creuseur ? *(bloquant — modèle de données)*
+### Q8 — Une opération est-elle rattachée à un creuseur ? — **✅ D8**
+
+> **Décision** : **obligatoire, par creuseur**. `creuseur_id` devient `NOT NULL`, le rapport gagne une ventilation par creuseur, et l'application devient une base de rémunération individuelle.
+
 
 Le fichier Excel n'établit **aucun lien** entre `BASE CREUSEURS` et `SAISIE JOURNALIERE`. Une opération correspond-elle :
 

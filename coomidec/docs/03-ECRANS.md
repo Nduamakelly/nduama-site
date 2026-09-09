@@ -10,7 +10,7 @@ Tablette Android 10 pouces, tenue à une main, souvent en plein soleil, parfois 
 | Taille de texte minimale | 16 px ; valeurs numériques 24 px |
 | Contraste | ≥ 7:1 (lisibilité en extérieur) |
 | Clics pour enregistrer une opération | **4** au maximum |
-| Champs à saisir par défaut | 3 (matière, QTY, teneur) — le reste est prérempli |
+| Champs à saisir par défaut | 4 (matière, QTY, teneur, creuseur) — le reste est prérempli |
 | Confirmation | bandeau plein écran 1,5 s + vibration courte |
 
 Pas d'ouverture de clavier alphabétique pour les nombres : pavé numérique intégré à l'écran, gros chiffres.
@@ -45,14 +45,14 @@ Un seul écran, pas d'assistant multi-étapes.
 1. **Matière première** — grosses tuiles (Cuivre, Cobalt, …), pas de liste déroulante.
 2. **QTY** + unité — pavé numérique ; l'unité vient de la matière, modifiable si plusieurs sont autorisées.
 3. **Teneur (%)** — pavé numérique.
-4. *(optionnel)* Creuseur — recherche instantanée par nom ou n° de carte.
+4. **Creuseur — obligatoire** (décision D8). Les creuseurs récents de l'équipe en cours sont proposés en accès direct ; la recherche complète par nom ou n° de carte reste disponible.
 5. *(optionnel)* Observation, signature.
 
 **Bandeau de calcul en direct**, sous les champs, mis à jour à chaque frappe :
 
 ```
-Barème appliqué   3,00 – 4,00 %      Coût/unité   120,00 USD      % coût   85 %
-MONTANT                                                       1 275,00 USD
+Prix par 1 %   140,00 USD      Valeur de teneur   3,2 % × 140 = 448,00 USD
+VALEUR                                                        5 600,00 USD
 ```
 
 Trois états visibles de ce bandeau : *calculé* · *hors barème* (avertissement orange, enregistrement possible avec statut `À VALIDER`) · *incomplet*.
@@ -75,7 +75,7 @@ Tableau dense mais lisible : `N°` · `Heure` · `Matière` · `QTY` · `Teneur`
 
 **Écran de pré-clôture** — récapitulatif avant confirmation :
 
-nombre d'opérations · QTY totale · QTY par matière · teneur moyenne (pondérée **et** arithmétique, voir Q1) · teneur min · teneur max · montant total · **opérations non synchronisées** · observations et incidents du jour.
+nombre d'opérations · QTY totale · QTY par matière · **QTY et valeur par creuseur** (D8) · teneur moyenne (pondérée **et** arithmétique, D1) · teneur min · teneur max · valeur totale · **opérations non synchronisées** · observations et incidents du jour.
 
 Blocages : aucune opération en statut `BROUILLON`, aucune opération `HORS BARÈME` non validée.
 
@@ -89,7 +89,7 @@ Après clôture : numéro de clôture, horodatage, verrouillage des opérations,
 
 Rendu A4 portrait, en-tête COOMIDEC (logo, raison sociale, site/ZEA, date).
 
-Corps : identification · indicateurs · détail par matière première · teneur moyenne/min/max · montant total · observations · heure de clôture · emplacements de signature (responsable de site, chef de poste).
+Corps : identification · indicateurs · détail par matière première · **détail par creuseur** (D8) · teneur moyenne pondérée et arithmétique (D1) · teneur min/max · **valeur totale de production** (D5) · observations · heure de clôture · emplacements de signature (responsable de site, chef de poste).
 
 Pied de page : numéro de clôture, `Page n/N`, mention `PROVISOIRE` en filigrane si des opérations restaient non synchronisées.
 
@@ -99,7 +99,7 @@ Le PDF est généré **localement** (pdf-lib), donc disponible hors ligne — la
 
 ## 6. Tableau de bord
 
-Ligne d'indicateurs du jour : nombre d'opérations · QTY totale · teneur moyenne · montant total · non synchronisées.
+Ligne d'indicateurs du jour : nombre d'opérations · QTY totale · teneur moyenne pondérée · valeur totale · non synchronisées.
 
 Filtres : jour / semaine / mois / période personnalisée · site · matière première.
 
@@ -111,7 +111,7 @@ Hors ligne, le tableau de bord calcule sur les données locales et l'indique cla
 
 Recherche instantanée (nom, postnom, prénom, téléphone, n° de carte). Fiche complète, création et modification.
 
-**Alerte carte artisanale** : pastille orange à 30 jours de l'expiration, rouge après échéance. Le comportement à la saisie d'une opération reste à trancher (Q13).
+**Alerte carte artisanale** : pastille orange à 30 jours de l'expiration, rouge après échéance. Depuis D8, chaque opération étant nominative, le comportement à la saisie devient sensible et reste à trancher (Q13).
 
 ## 8. Paramètres
 

@@ -36,18 +36,18 @@ interface ResultatCalcul {
 }
 ```
 
-## Méthode A — prix par 1 % de teneur
+## Méthode A — prix par 1 % de teneur *(méthode de référence, décision D4)*
 
 ```
 valeurTeneur = TENEUR × PRIX_PAR_POURCENT
 montant      = QTY × VALEUR_TENEUR × PCT_COUT       (PCT_COUT = 1 par défaut)
 ```
 
-Exemple : cuivre, 1 % = 120 USD, teneur 3 % → `valeurTeneur = 360 USD`.
+Exemple validé : **cuivre, 1 % = 140 USD**. Teneur 3,2 % → `valeurTeneur = 448 USD` ; QTY 12,5 t → **5 600,00 USD**.
 
-> ⚠️ **Cette méthode n'existe pas dans le fichier Excel actuel.** Elle est ajoutée à votre demande. La formule finale reliant `valeurTeneur` à `QTY` doit être confirmée (voir Q17).
+Cette méthode n'existait pas dans le classeur : elle est ajoutée à la suite de la décision D4, qui en fixe la référence tarifaire.
 
-## Méthode B — barème par tranches *(comportement du fichier Excel actuel)*
+## Méthode B — barème par tranches *(comportement du fichier Excel, conservé pour continuité)*
 
 ```
 tranche       = barème(matière, teneur)
@@ -78,7 +78,7 @@ C'est la transposition exacte de `SAISIE JOURNALIERE!G9`, avec **deux correction
 
 ```
 BAREME_TRANCHES     QTY * COUT_UNITAIRE * PCT_COUT
-PRIX_PAR_POURCENT   QTY * TENEUR * PRIX_PAR_POURCENT * PCT_COUT
+PRIX_PAR_POURCENT   QTY * VALEUR_TENEUR * PCT_COUT        (VALEUR_TENEUR = TENEUR × PRIX_PAR_POURCENT)
 ```
 
 Toute formule est validée à l'enregistrement dans Paramètres (syntaxe, variables connues, absence de division par zéro sur un jeu d'essai) et testée dans le simulateur avant d'être activée.

@@ -51,10 +51,12 @@ ALTER TABLE baremes_teneur ADD CONSTRAINT baremes_sans_chevauchement
 ## `operations` — table centrale
 
 **Identité et contexte**
-`id UUID` · `numero` (voir plus bas) · `site_id` · `date_operation DATE` · `heure TIME` · `responsable_id` · `creuseur_id` (nullable) · `equipe`
+`id UUID` · `numero` (voir plus bas) · `site_id` · `date_operation DATE` · `heure TIME` · `responsable_id` · **`creuseur_id NOT NULL`** (décision D8) · `equipe`
 
 **Saisie de l'agent**
 `matiere_id` · `qty NUMERIC(18,3)` · `unite_id` · `teneur NUMERIC(6,3)` · `observation TEXT` · `signature_blob`
+
+Chaque opération est nominative (D8) : la ventilation par creuseur devient un axe de rapport à part entière, et l'exigence sur le journal d'audit s'en trouve renforcée — ces chiffres serviront de base à une rémunération individuelle.
 
 **Snapshot de calcul — figé à l'enregistrement, jamais recalculé**
 `montant NUMERIC(18,2)` · `devise` · `calcul JSONB`
@@ -97,6 +99,7 @@ exemple : COOMIDEC/KOL/20260909/A7F3-014
 CREATE INDEX ON operations (site_id, date_operation) WHERE deleted_at IS NULL;
 CREATE INDEX ON operations (sync_status) WHERE sync_status <> 'SYNCHRONISE';
 CREATE INDEX ON operations (matiere_id, date_operation);
+CREATE INDEX ON operations (creuseur_id, date_operation);   -- ventilation par creuseur (D8)
 ```
 
 ## `creuseurs`

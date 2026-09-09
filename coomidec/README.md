@@ -4,9 +4,9 @@ Remplacement progressif du classeur *COOMIDEC Système Simplifié Gestion Site*
 par une application web progressive (PWA) **offline-first**, utilisable sur
 tablette Android sur les sites, sans connexion Internet.
 
-> **État actuel : phase de conception.** Aucun code applicatif n'est encore
-> écrit — conformément à la demande, l'architecture est présentée et validée
-> avant le développement.
+> **État actuel : conception validée, module M2 livré.**
+> Les quatre questions bloquantes ont été tranchées ([`docs/08-DECISIONS.md`](docs/08-DECISIONS.md))
+> et le moteur de calcul `@coomidec/core` est écrit et testé (43 tests).
 
 ## Documents de conception
 
@@ -20,6 +20,34 @@ tablette Android sur les sites, sans connexion Internet.
 | [`docs/05-MOTEUR-CALCUL.md`](docs/05-MOTEUR-CALCUL.md) | **E** — Moteur centralisé, deux méthodes, immuabilité des tarifs |
 | [`docs/06-QUESTIONS-METIER.md`](docs/06-QUESTIONS-METIER.md) | **F** — 20 points à valider, dont 4 bloquants |
 | [`docs/07-PLAN-LIVRAISON.md`](docs/07-PLAN-LIVRAISON.md) | Modules M0 → M10 et couverture des sept critères de validation |
+| [`docs/08-DECISIONS.md`](docs/08-DECISIONS.md) | **D1, D4, D5, D8** — décisions validées et leurs conséquences |
+
+## Moteur de calcul — `packages/core`
+
+```bash
+npm install
+npm test          # 43 tests, dont TEST 3 et TEST 4 des critères de validation
+```
+
+Fonction pure, sans I/O, partagée entre la tablette et le serveur :
+
+```ts
+import { calculerOperation } from '@coomidec/core';
+
+calculerOperation({
+  qty: '12.5', teneur: '3.2',
+  matiere: { methode: 'PRIX_PAR_POURCENT', prixParPourcent: '140', devise: 'USD', /* … */ },
+  calculeA: '2026-09-09T08:14:03+02:00',
+});
+// → montant '5600.00', snapshot autoportant figeant le tarif appliqué
+```
+
+| Fichier | Rôle |
+|---|---|
+| `src/calcul.ts` | `calculerOperation` et `verifierSnapshot` (revérification serveur) |
+| `src/formule.ts` | Évaluateur d'expressions restreint — **sans `eval`** |
+| `src/bareme.ts` | Résolution de tranche, détection des chevauchements et des trous |
+| `src/agregats.ts` | Teneur moyenne pondérée **et** arithmétique, totaux de journée |
 
 ## Ce que le classeur fait aujourd'hui
 
@@ -46,4 +74,9 @@ Dossier de conception mis en page : https://claude.ai/code/artifact/a003aeb1-ecf
 
 ## Prochaine étape
 
-Validation des **4 questions bloquantes** de [`docs/06-QUESTIONS-METIER.md`](docs/06-QUESTIONS-METIER.md) — Q1, Q4, Q5, Q8 — puis démarrage du module **M0**.
+Modules **M0** (socle API + PostgreSQL) et **M1** (paramètres, matières, barèmes historisés),
+puis **M3** (saisie hors ligne) et **M4** (synchronisation).
+
+Un point reste à préciser avant la mise en production : le rôle exact de `% COÛT`
+en méthode B — voir la fin de [`docs/08-DECISIONS.md`](docs/08-DECISIONS.md).
+Il ne bloque pas le développement, la formule étant une donnée de configuration.
